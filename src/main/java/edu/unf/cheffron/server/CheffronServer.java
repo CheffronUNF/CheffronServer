@@ -1,10 +1,14 @@
 package edu.unf.cheffron.server;
 
 import edu.unf.cheffron.server.database.MySQLDatabase;
+import edu.unf.cheffron.server.service.WebService;
 
+import java.io.IOException;
 import java.sql.SQLException;
 
 public class CheffronServer {
+
+    private static final int PORT = 8808;
 
     public static void main(String[] args) {
         // connect to database and instantiate database object
@@ -15,7 +19,13 @@ public class CheffronServer {
             return;
         }
 
-        // TODO: start web server and begin listening for requests
+        try {
+            WebService webService = new WebService(database, PORT);
+            webService.listen();
+            System.out.println("Started web service on port " + PORT);
+        } catch (IOException e) {
+            System.err.println("Could not start web service! Check port availability/permissions");
+        }
     }
 
     private static MySQLDatabase connectToDatabase(String[] args) {

@@ -1,8 +1,8 @@
 package edu.unf.cheffron.server.database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import edu.unf.cheffron.server.database.model.User;
+
+import java.sql.*;
 
 public class MySQLDatabase {
 
@@ -19,10 +19,42 @@ public class MySQLDatabase {
         this.databasePort = databasePort;
     }
 
+    public boolean isConnected() throws SQLException {
+        return connection != null && !connection.isClosed();
+    }
+
     public void connect() throws SQLException {
-        if (connection == null || connection.isClosed()) {
+        if (!isConnected()) {
             String connectionUrl = String.format("jdbc:mysql://%s:%d/%s", databaseHost, databasePort, databaseName);
             connection = DriverManager.getConnection(connectionUrl, databaseUser, databasePass);
+        }
+    }
+
+    private Connection getConnection() throws SQLException {
+        connect();
+        return connection;
+    }
+
+    private Statement createStatement() throws SQLException {
+        return getConnection().createStatement();
+    }
+
+    // example SQL request
+    public User getUserDetailsById(int userId) throws SQLException {
+        try (Statement statement = createStatement()) {
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM User WHERE userId = " + userId);
+
+            if (!resultSet.next()) {
+                // not found
+                return null;
+            }
+
+            String username = resultSet.getString("username");
+            String email = resultSet.getString("email");
+            String name = resultSet.getString("name");
+            int chefHatsReceived = resultSet.getInt("chefHatsReceived");
+
+            return new User(userId, username, email, name, chefHatsReceived);
         }
     }
 }
