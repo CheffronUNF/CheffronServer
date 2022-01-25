@@ -23,16 +23,16 @@ public class MySQLDatabase {
         return connection != null && !connection.isClosed();
     }
 
-    public void connect() throws SQLException {
+    public Connection connect() throws SQLException {
         if (!isConnected()) {
             String connectionUrl = String.format("jdbc:mysql://%s:%d/%s", databaseHost, databasePort, databaseName);
             connection = DriverManager.getConnection(connectionUrl, databaseUser, databasePass);
         }
+        return connection;
     }
 
     private Connection getConnection() throws SQLException {
-        connect();
-        return connection;
+        return connect();
     }
 
     private Statement createStatement() throws SQLException {
