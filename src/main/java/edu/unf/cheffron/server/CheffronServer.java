@@ -12,15 +12,10 @@ public class CheffronServer {
 
     public static void main(String[] args) {
         // connect to database and instantiate database object
-        MySQLDatabase database = connectToDatabase(args);
-
-        if (database == null) {
-            System.exit(1);
-            return;
-        }
+        connectToDatabase(args);
 
         try {
-            WebService webService = new WebService(database, PORT);
+            WebService webService = new WebService(PORT);
             webService.listen();
             System.out.println("Started web service on port " + PORT);
         } catch (IOException e) {
@@ -28,13 +23,13 @@ public class CheffronServer {
         }
     }
 
-    private static MySQLDatabase connectToDatabase(String[] args) {
+    private static void connectToDatabase(String[] args) {
         System.out.println("Attempting connection to database...");
 
         if (args.length < 5) {
             System.err.println("Invalid starting parameters. Enter database information as command line arguments");
             System.err.println("Format: [db host] [db name] [db user] [db pass] [db port]");
-            return null;
+            System.exit(1);
         }
 
         String host = args[0];
@@ -45,22 +40,20 @@ public class CheffronServer {
 
         if (!port.matches("[0-9]+")) {
             System.err.println("Port must be a valid integer!");
-            return null;
+            System.exit(1);
         }
 
-        MySQLDatabase database = new MySQLDatabase(host, name, user, pass, Integer.parseInt(port));
+        MySQLDatabase.initialize(host, name, user, pass, Integer.parseInt(port));
 
         // test connection
         try {
-            database.connect();
+            MySQLDatabase.connect();
         } catch (SQLException e) {
             System.err.println("Could not connect database! Check host and credentials");
             e.printStackTrace();
-            return null;
+            System.exit(1);
         }
 
         System.out.println("Successfully connected to database.");
-
-        return database;
     }
 }
