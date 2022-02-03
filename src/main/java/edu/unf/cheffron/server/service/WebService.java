@@ -1,23 +1,20 @@
 package edu.unf.cheffron.server.service;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.sun.net.httpserver.HttpServer;
-import edu.unf.cheffron.server.database.MySQLDatabase;
-import edu.unf.cheffron.server.service.endpoint.Auth;
-import edu.unf.cheffron.server.service.endpoint.Ingredient;
-import edu.unf.cheffron.server.service.endpoint.Recipe;
+import edu.unf.cheffron.server.service.endpoint.AuthHandler;
+import edu.unf.cheffron.server.service.endpoint.IngredientHandler;
+import edu.unf.cheffron.server.service.endpoint.RecipeHandler;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class WebService {
-
-    private final MySQLDatabase database;
+    private static final System.Logger LOG = System.getLogger("CheffronWebService");
 
     private HttpServer server;
 
-    public WebService(MySQLDatabase database, int port) throws IOException {
-        this.database = database;
+    public WebService(int port) throws IOException {
         server = HttpServer.create(new InetSocketAddress(port), 0);
 
         registerContexts();
@@ -28,9 +25,9 @@ public class WebService {
     }
 
     private void registerContexts() {
-        new Auth().registerContexts(server, database);
-        new Ingredient().registerContexts(server, database);
-        new Recipe().registerContexts(server, database);
-        new edu.unf.cheffron.server.service.endpoint.User().registerContexts(server, database);
+        server.createContext("/auth", new AuthHandler());
+        server.createContext("/ingredient", new IngredientHandler());
+        server.createContext("/recipe", new RecipeHandler());
+        server.createContext("/user", new RecipeHandler());
     }
 }
