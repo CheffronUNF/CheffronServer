@@ -1,13 +1,12 @@
-package edu.unf.cheffron.server.service.endpoint;
+package edu.unf.cheffron.server.service.handler;
 
 import java.io.IOException;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
 import edu.unf.cheffron.server.database.MySQLDatabase;
 
-public class IngredientHandler extends Endpoint implements HttpHandler {
+public class UserHandler extends Endpoint implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         // TODO Auto-generated method stub

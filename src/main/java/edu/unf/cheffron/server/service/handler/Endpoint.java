@@ -1,11 +1,12 @@
-package edu.unf.cheffron.server.service.endpoint;
+package edu.unf.cheffron.server.service.handler;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
-import edu.unf.cheffron.server.database.model.User;
+
+import edu.unf.cheffron.server.model.User;
 
 import java.io.IOException;
 import java.io.OutputStream;

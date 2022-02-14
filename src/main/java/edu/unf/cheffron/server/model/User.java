@@ -1,12 +1,11 @@
-package edu.unf.cheffron.server.database.model;
+package edu.unf.cheffron.server.model;
 
 public class User {
 
-    private final int userId;
-    private final String username, email, name;
+    private final String userId, username, email, name;
     private final int chefHatsReceived;
 
-    public User(int userId, String username, String email, String name, int chefHatsReceived) {
+    public User(String userId, String username, String email, String name, int chefHatsReceived) {
         this.userId = userId;
         this.username = username;
         this.email = email;
@@ -14,7 +13,7 @@ public class User {
         this.chefHatsReceived = chefHatsReceived;
     }
 
-    public int getUserId() {
+    public String getUserId() {
         return userId;
     }
 

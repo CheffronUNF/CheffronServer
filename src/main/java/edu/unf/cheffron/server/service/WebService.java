@@ -1,10 +1,7 @@
 package edu.unf.cheffron.server.service;
 
-import com.google.gson.*;
 import com.sun.net.httpserver.HttpServer;
-import edu.unf.cheffron.server.service.endpoint.AuthHandler;
-import edu.unf.cheffron.server.service.endpoint.IngredientHandler;
-import edu.unf.cheffron.server.service.endpoint.RecipeHandler;
+import edu.unf.cheffron.server.service.handler.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
