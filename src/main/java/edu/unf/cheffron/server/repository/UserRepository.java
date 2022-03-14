@@ -3,7 +3,13 @@ package edu.unf.cheffron.server.repository;
 import edu.unf.cheffron.server.database.MySQLDatabase;
 import edu.unf.cheffron.server.model.User;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
+import java.util.Base64;
+import java.util.UUID;
 
 public class UserRepository implements Repository<String, User>
 {
@@ -22,11 +28,11 @@ public class UserRepository implements Repository<String, User>
         try {
             Connection = MySQLDatabase.connect();
 
-            CreateStatement = Connection.prepareStatement("INSERT INTO User (UserId, Username, Email, Name) VALUES ?, ?, ?, ?");
-            ReadStatement = Connection.prepareStatement("SELECT * FROM User WHERE UserId = ?");
-            ReadAllStatement = Connection.prepareStatement("SELECT * FROM User");
-            UpdateStatement = Connection.prepareStatement("UPDATE User SET Username = ?, Email = ?, Name = ? WHERE UserId = ?");
-            DeleteStatement = Connection.prepareStatement("DELETE FROM User WHERE UserId = ?");
+            CreateStatement = Connection.prepareStatement("INSERT INTO user (UserId, Username, Email, Name) VALUES ?, ?, ?, ?");
+            ReadStatement = Connection.prepareStatement("SELECT * FROM user WHERE UserId = ?");
+            ReadAllStatement = Connection.prepareStatement("SELECT * FROM user");
+            UpdateStatement = Connection.prepareStatement("UPDATE user SET Username = ?, Email = ?, Name = ? WHERE UserId = ?");
+            DeleteStatement = Connection.prepareStatement("DELETE FROM user WHERE UserId = ?");
         } catch (SQLException ex) {
             System.err.println("FATAL! Could not initialize User Repository!");
             ex.printStackTrace();
@@ -137,15 +143,70 @@ public class UserRepository implements Repository<String, User>
     }
 
     /**
+     * Creates user from required user fields inputted through account page
+     *
+     * @return userId of newly created user
+     */
+    public String createUser(String username, String name, String email, String password) throws SQLException {
+        String userId = findNextUserId();
+
+        try (Statement statement = Connection.createStatement()) {
+            String sql = String.format("INSERT INTO user (userId, username, name, email, password) " +
+                    "VALUES ('%s', '%s', '%s', '%s', '%s')", userId, username, name, email, password);
+            statement.execute(sql);
+
+            return userId;
+        }
+    }
+
+    public String findNextUserId() throws SQLException {
+        while (true) {
+            UUID uuid = UUID.randomUUID();
+            User user = Read(uuid.toString());
+            if (user == null)
+                return uuid.toString();
+        }
+    }
+
+    /**
+     * Check if user already exists based on username and email supplied from create account
+     *
+     * @return 0 if user does not exist, 1 if username exists, 2 if email exists
+     */
+    public int checkIfUserExists(String username, String email) throws SQLException {
+        try (Statement statement = Connection.createStatement()) {
+            ResultSet rs = statement
+                    .executeQuery(String.format("SELECT username FROM user WHERE username = '%s' OR email = '%s'"
+                            , username, email));
+            if (rs.next()) {
+                if (username.equalsIgnoreCase(rs.getString("username"))) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    /**
      * Validates that the password matches for the username
      *
      * @return userId if validation successful, null otherwise
      */
-    public String validateUserPassword(String username, String password) throws SQLException {
+    public String validateUserPassword(String username, String password, Cipher rsaDecrypt) throws SQLException, IllegalBlockSizeException, BadPaddingException {
         try (Statement statement = Connection.createStatement()) {
-            ResultSet rs = statement.executeQuery("SELECT * FROM user WHERE username = '" + username + "'");
+            ResultSet rs = statement.executeQuery("SELECT userId, password FROM user WHERE username = '" + username + "'");
             if (rs.next()) {
+                System.out.println(password);
                 String dbPassword = rs.getString("password");
+                System.out.println(dbPassword);
+                dbPassword = new String(Base64.getDecoder().decode(dbPassword));
+                System.out.println(dbPassword);
+                dbPassword = new String(rsaDecrypt.doFinal(dbPassword.getBytes(StandardCharsets.UTF_8)));
+
+                System.out.println(dbPassword);
 
                 if (dbPassword.equals(password)) {
                     return rs.getString("userId");

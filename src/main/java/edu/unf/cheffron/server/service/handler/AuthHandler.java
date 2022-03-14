@@ -24,18 +24,6 @@ public class AuthHandler extends Endpoint implements HttpHandler
 {
     private static final String AuthHeader = "Authorization";
 
-    private Cipher cipher;
-
-    public AuthHandler() {
-        try {
-            cipher = Cipher.getInstance("RSA");
-            cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
-            LOG.log(Level.SEVERE, "FATAL! Could not initialize password Cipher. Passwords cannot be encrypted!", e);
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void handle(HttpExchange exchange) throws IOException
     {
@@ -97,11 +85,10 @@ public class AuthHandler extends Endpoint implements HttpHandler
         }
 
         String username = userpass[0];
+        String password = userpass[1];
 
         try {
-            String encryptedPassword = new String(Base64.getEncoder().encode(cipher.doFinal(userpass[1].getBytes(StandardCharsets.UTF_8))));
-
-            String userId = UserRepository.getUserRepository().validateUserPassword(username, encryptedPassword);
+            String userId = UserRepository.getUserRepository().validateUserPassword(username, password, rsaDecrypt);
 
             if (userId == null) {
                 respondError(exchange, 401, "Login failed");
@@ -125,14 +112,5 @@ public class AuthHandler extends Endpoint implements HttpHandler
     private String DecodeBase64(String str)
     {
         return new String(java.util.Base64.getDecoder().decode(str.getBytes()));
-    }
-
-    private String createJWTToken(String userId, String username) {
-        return Jwts.builder()
-                .setSubject(userId)
-                .claim("username", username)
-                .setIssuedAt(new Date())
-                .signWith(privateKey, SignatureAlgorithm.RS256)
-                .compact();
     }
 }

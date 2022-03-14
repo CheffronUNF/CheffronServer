@@ -3,7 +3,11 @@ package edu.unf.cheffron.server.service.handler;
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
 import edu.unf.cheffron.server.model.User;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,6 +18,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +29,9 @@ public abstract class Endpoint {
 
     static protected PrivateKey privateKey;
     static protected PublicKey publicKey;
+
+    static protected Cipher rsaEncrypt;
+    static protected Cipher rsaDecrypt;
 
     static {
         try {
@@ -55,6 +63,25 @@ public abstract class Endpoint {
             LOG.log(Level.SEVERE, "FATAL! Unable to read public/private key pair!");
             ex.printStackTrace();
         }
+
+        try {
+            rsaEncrypt = Cipher.getInstance("RSA");
+            rsaEncrypt.init(Cipher.ENCRYPT_MODE, publicKey);
+            rsaDecrypt = Cipher.getInstance("RSA");
+            rsaDecrypt.init(Cipher.DECRYPT_MODE, privateKey);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
+            LOG.log(Level.SEVERE, "FATAL! Could not initialize password Cipher. Passwords cannot be encrypted!", e);
+            e.printStackTrace();
+        }
+    }
+
+    protected String createJWTToken(String userId, String username) {
+        return Jwts.builder()
+                .setSubject(userId)
+                .claim("username", username)
+                .setIssuedAt(new Date())
+                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .compact();
     }
 
     protected User authenticateUser(HttpExchange exchange) {
