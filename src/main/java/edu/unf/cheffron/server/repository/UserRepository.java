@@ -19,21 +19,21 @@ public class UserRepository implements Repository<String, User>
     {
         Connection = MySQLDatabase.connect();
 
-        CreateStatement = Connection.prepareStatement("INSERT INTO User (UserId, Username, Email, Name, ChefHatsReceived) VALUES ?, ?, ?, ?, ?");
+        CreateStatement = Connection.prepareStatement("INSERT INTO User (UserId, Username, Email, Name) VALUES ?, ?, ?, ?");
         ReadStatement = Connection.prepareStatement("SELECT * FROM User WHERE UserId = ?");
         ReadAllStatement = Connection.prepareStatement("SELECT * FROM User");
-        UpdateStatement = Connection.prepareStatement("UPDATE User SET Username = ?, Email = ?, Name = ?, ChefHatsReceived = ? WHERE UserId = ?");
+        UpdateStatement = Connection.prepareStatement("UPDATE User SET Username = ?, Email = ?, Name = ? WHERE UserId = ?");
         DeleteStatement = Connection.prepareStatement("DELETE FROM User WHERE UserId = ?");
     }
 
     @Override
-    public User Create(User item) throws SQLException 
+    public User Create(User item) throws SQLException
     {
         CreateStatement.setString(1, item.getUserId());
-        CreateStatement.setString(1, item.getUsername());
-        CreateStatement.setString(1, item.getEmail());
-        CreateStatement.setString(1, item.getName());
-        CreateStatement.setInt(1, item.getChefHatsReceived());
+        CreateStatement.setString(2, item.getUsername());
+        CreateStatement.setString(3, item.getEmail());
+        CreateStatement.setString(4, item.getName());
+//        CreateStatement.setInt(1, item.getChefHatsReceived());
 
         CreateStatement.executeUpdate();
 
@@ -77,8 +77,8 @@ public class UserRepository implements Repository<String, User>
         UpdateStatement.setString(1, item.getUsername());
         UpdateStatement.setString(2, item.getEmail());
         UpdateStatement.setString(3, item.getName());
-        UpdateStatement.setInt(4, item.getChefHatsReceived());
-        UpdateStatement.setString(5, id);
+//        UpdateStatement.setInt(4, item.getChefHatsReceived());
+        UpdateStatement.setString(4, id);
 
         UpdateStatement.executeUpdate();
 
