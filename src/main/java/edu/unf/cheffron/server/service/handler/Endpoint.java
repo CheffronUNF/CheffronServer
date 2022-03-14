@@ -1,21 +1,61 @@
 package edu.unf.cheffron.server.service.handler;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
-
 import edu.unf.cheffron.server.model.User;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.System.Logger.Level;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.*;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class Endpoint {
 
-    protected static final System.Logger LOG = System.getLogger("CheffronWebService");
+    protected static final Logger LOG = Logger.getLogger("CheffronWebService");
+    protected static final Gson GSON = new Gson();
+
+    static protected PrivateKey privateKey;
+    static protected PublicKey publicKey;
+
+    static {
+        try {
+            // code to generate RS256 key pair
+//            KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
+//            PrintWriter writer = new PrintWriter("/home/elian/javaprojects/school_projects/CheffronServer/jwtRS256.key");
+//            writer.write(new String(Base64.getEncoder().encode(keyPair.getPrivate().getEncoded())));
+//            writer.flush();
+//            writer.close();
+//            writer = new PrintWriter("/home/elian/javaprojects/school_projects/CheffronServer/jwtRS256.key.pub");
+//            writer.write(new String(Base64.getEncoder().encode(keyPair.getPublic().getEncoded())));
+//            writer.flush();
+//            writer.close();
+
+            byte[] privateKeyBytes = Base64.getDecoder().decode(Files.readAllBytes(Path.of("jwtRS256.key")));
+            byte[] publicKeyBytes = Base64.getDecoder().decode(Files.readAllBytes(Path.of("jwtRS256.key.pub")));
+
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+
+            EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+            EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+
+            privateKey = factory.generatePrivate(privateKeySpec);
+            publicKey = factory.generatePublic(publicKeySpec);
+        } catch (IOException | NullPointerException ex) {
+            LOG.log(Level.SEVERE, "FATAL! Public and private keys not found in package! Authentication impossible.");
+            ex.printStackTrace();
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+            LOG.log(Level.SEVERE, "FATAL! Unable to read public/private key pair!");
+            ex.printStackTrace();
+        }
+    }
 
     protected User authenticateUser(HttpExchange exchange) {
         String jwt = exchange.getRequestHeaders().getFirst("Bearer");
@@ -34,17 +74,17 @@ public abstract class Endpoint {
             String line = new String(exchange.getRequestBody().readAllBytes());
             JsonElement element = JsonParser.parseString(line);
             if (element == null || element.isJsonNull() || !element.isJsonObject()) {
-                respond(exchange, 400, "Invalid json received.");
+                respondError(exchange, 400, "Invalid json received.");
             } else {
                 // return appropriate json object
                 return element.getAsJsonObject();
             }
         } catch (IOException ex) {
             LOG.log(Level.WARNING, "Could not read line from request body!", ex);
-            respond(exchange, 500, "Could not read request");
+            respondError(exchange, 500, "Could not read request");
         } catch (JsonSyntaxException ex) {
             LOG.log(Level.WARNING, "Received invalid JSON from client!", ex);
-            respond(exchange, 400, "Invalid json received: " + ex.getMessage());
+            respondError(exchange, 400, "Invalid json received: " + ex.getMessage());
         }
 
         // errored out
@@ -64,5 +104,16 @@ public abstract class Endpoint {
         } catch (IOException ex) {
             LOG.log(Level.WARNING, "Could not respond to client!", ex);
         }
+    }
+
+    protected void respond(HttpExchange exchange, int statusCode, JsonObject body) {
+        String json = GSON.toJson(body);
+        respond(exchange, statusCode, json);
+    }
+
+    protected void respondError(HttpExchange exchange, int statusCode, String error) {
+        JsonObject object = new JsonObject();
+        object.addProperty("error", error);
+        respond(exchange, statusCode, object);
     }
 }

@@ -1,29 +1,40 @@
 package edu.unf.cheffron.server.repository;
 
-import java.sql.*;
-
 import edu.unf.cheffron.server.database.MySQLDatabase;
 import edu.unf.cheffron.server.model.User;
 
-public class UserRepository implements Repository<String, User> 
+import java.sql.*;
+
+public class UserRepository implements Repository<String, User>
 {
-    private final Connection Connection;
+    private static UserRepository INSTANCE = new UserRepository();
 
-    private final PreparedStatement CreateStatement;
-    private final PreparedStatement ReadStatement;
-    private final PreparedStatement ReadAllStatement;
-    private final PreparedStatement UpdateStatement;
-    private final PreparedStatement DeleteStatement;
+    private Connection Connection;
 
-    public UserRepository() throws SQLException
+    private PreparedStatement CreateStatement;
+    private PreparedStatement ReadStatement;
+    private PreparedStatement ReadAllStatement;
+    private PreparedStatement UpdateStatement;
+    private PreparedStatement DeleteStatement;
+
+    public UserRepository()
     {
-        Connection = MySQLDatabase.connect();
+        try {
+            Connection = MySQLDatabase.connect();
 
-        CreateStatement = Connection.prepareStatement("INSERT INTO User (UserId, Username, Email, Name) VALUES ?, ?, ?, ?");
-        ReadStatement = Connection.prepareStatement("SELECT * FROM User WHERE UserId = ?");
-        ReadAllStatement = Connection.prepareStatement("SELECT * FROM User");
-        UpdateStatement = Connection.prepareStatement("UPDATE User SET Username = ?, Email = ?, Name = ? WHERE UserId = ?");
-        DeleteStatement = Connection.prepareStatement("DELETE FROM User WHERE UserId = ?");
+            CreateStatement = Connection.prepareStatement("INSERT INTO User (UserId, Username, Email, Name) VALUES ?, ?, ?, ?");
+            ReadStatement = Connection.prepareStatement("SELECT * FROM User WHERE UserId = ?");
+            ReadAllStatement = Connection.prepareStatement("SELECT * FROM User");
+            UpdateStatement = Connection.prepareStatement("UPDATE User SET Username = ?, Email = ?, Name = ? WHERE UserId = ?");
+            DeleteStatement = Connection.prepareStatement("DELETE FROM User WHERE UserId = ?");
+        } catch (SQLException ex) {
+            System.err.println("FATAL! Could not initialize User Repository!");
+            ex.printStackTrace();
+        }
+    }
+
+    public static UserRepository getUserRepository() {
+        return INSTANCE;
     }
 
     @Override
@@ -41,11 +52,11 @@ public class UserRepository implements Repository<String, User>
     }
 
     @Override
-    public User[] Read() throws SQLException 
+    public User[] Read() throws SQLException
     {
         var rs = ReadAllStatement.executeQuery();
         var size = GetResultSetSize(rs);
-        
+
         var res = new User[size];
 
         while (rs.next())
@@ -57,7 +68,7 @@ public class UserRepository implements Repository<String, User>
     }
 
     @Override
-    public User Read(String id) throws SQLException 
+    public User Read(String id) throws SQLException
     {
         ReadStatement.setString(1, id);
 
@@ -72,7 +83,7 @@ public class UserRepository implements Repository<String, User>
     }
 
     @Override
-    public User Update(String id, User item) throws SQLException 
+    public User Update(String id, User item) throws SQLException
     {
         UpdateStatement.setString(1, item.getUsername());
         UpdateStatement.setString(2, item.getEmail());
@@ -86,7 +97,7 @@ public class UserRepository implements Repository<String, User>
     }
 
     @Override
-    public boolean Delete(String id) throws SQLException 
+    public boolean Delete(String id) throws SQLException
     {
         DeleteStatement.setString(1, id);
 
@@ -100,10 +111,10 @@ public class UserRepository implements Repository<String, User>
         try
         {
             int index = rs.getRow();
-    
+
             rs.last();
             rs.getRow();
-    
+
             rs.absolute(index);
         }
         catch (SQLException e)
@@ -120,8 +131,30 @@ public class UserRepository implements Repository<String, User>
         String username = rs.getString("username");
         String email = rs.getString("email");
         String name = rs.getString("name");
-        int chefHatsReceived = rs.getInt("chefHatsReceived");
+//        int chefHatsReceived = rs.getInt("chefHatsReceived");
 
-        return new User(userId, username, email, name, chefHatsReceived);
+        return new User(userId, username, email, name, 0);
+    }
+
+    /**
+     * Validates that the password matches for the username
+     *
+     * @return userId if validation successful, null otherwise
+     */
+    public String validateUserPassword(String username, String password) throws SQLException {
+        try (Statement statement = Connection.createStatement()) {
+            ResultSet rs = statement.executeQuery("SELECT * FROM user WHERE username = '" + username + "'");
+            if (rs.next()) {
+                String dbPassword = rs.getString("password");
+
+                if (dbPassword.equals(password)) {
+                    return rs.getString("userId");
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
     }
 }
