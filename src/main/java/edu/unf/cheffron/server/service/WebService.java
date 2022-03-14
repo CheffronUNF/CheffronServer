@@ -25,6 +25,6 @@ public class WebService {
         server.createContext("/auth", new AuthHandler());
         server.createContext("/ingredient", new IngredientHandler());
         server.createContext("/recipe", new RecipeHandler());
-        server.createContext("/user", new RecipeHandler());
+        server.createContext("/user", new UserHandler());
     }
 }
