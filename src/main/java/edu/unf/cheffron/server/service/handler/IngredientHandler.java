@@ -7,9 +7,11 @@ import com.sun.net.httpserver.HttpHandler;
 
 import edu.unf.cheffron.server.database.MySQLDatabase;
 
-public class IngredientHandler extends Endpoint implements HttpHandler {
+public class IngredientHandler extends Endpoint implements HttpHandler 
+{
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
+    public void handle(HttpExchange exchange) throws IOException 
+    {
         // TODO Auto-generated method stub
         
     }

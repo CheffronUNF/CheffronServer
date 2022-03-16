@@ -4,12 +4,12 @@ import java.sql.SQLException;
 
 public interface Repository<K, V> 
 {
-    public V Create(V item) throws SQLException;
+    public V create(V item) throws SQLException;
 
-    public V[] Read() throws SQLException;
-    public V Read(K id) throws SQLException;
+    public V[] read() throws SQLException;
+    public V read(K id) throws SQLException;
 
-    public V Update(K id,V item) throws SQLException;
+    public V update(K id,V item) throws SQLException;
 
-    public boolean Delete(K id) throws SQLException;
+    public boolean delete(K id) throws SQLException;
 }
