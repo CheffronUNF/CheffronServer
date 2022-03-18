@@ -8,8 +8,6 @@ import java.net.InetSocketAddress;
 
 public class WebService 
 {
-    private static final System.Logger LOG = System.getLogger("CheffronWebService");
-
     private HttpServer server;
 
     public WebService(int port) throws IOException 

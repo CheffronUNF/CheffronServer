@@ -1,43 +1,50 @@
 package edu.unf.cheffron.server.repository;
 
+import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.database.MySQLDatabase;
 import edu.unf.cheffron.server.model.User;
 
 import java.sql.*;
+import java.util.logging.Level;
 
 public class UserRepository implements Repository<String, User>
 {
-    public static UserRepository instance = new UserRepository();
+    public static UserRepository instance;
 
-    private Connection Connection;
+    private final Connection Connection;
 
-    private PreparedStatement CreateStatement;
-    private PreparedStatement ReadStatement;
-    private PreparedStatement ReadByEmailStatement;
-    private PreparedStatement ReadByUsernameStatement;
-    private PreparedStatement ReadAllStatement;
-    private PreparedStatement UpdateStatement;
-    private PreparedStatement DeleteStatement;
+    private final PreparedStatement CreateStatement;
+    private final PreparedStatement ReadStatement;
+    private final PreparedStatement ReadByEmailStatement;
+    private final PreparedStatement ReadByUsernameStatement;
+    private final PreparedStatement ReadAllStatement;
+    private final PreparedStatement UpdateStatement;
+    private final PreparedStatement DeleteStatement;
 
-    private UserRepository()
+    static
     {
-        try 
+        try
         {
-            Connection = MySQLDatabase.connect();
-
-            CreateStatement = Connection.prepareStatement("INSERT INTO user (UserId, Username, Email, Name, Password) VALUES ?, ?, ?, ?, ?");
-            ReadStatement = Connection.prepareStatement("SELECT * FROM user WHERE UserId = ?");
-            ReadByEmailStatement = Connection.prepareStatement("SELECT * FROM user WHERE Email = ?");
-            ReadByUsernameStatement = Connection.prepareStatement("SELECT * FROM user WHERE Username = ?");
-            ReadAllStatement = Connection.prepareStatement("SELECT * FROM user");
-            UpdateStatement = Connection.prepareStatement("UPDATE user SET Username = ?, Email = ?, Name = ?, Password = ? WHERE UserId = ?");
-            DeleteStatement = Connection.prepareStatement("DELETE FROM user WHERE UserId = ?");
-        } 
-        catch (SQLException ex) 
-        {
-            System.err.println("FATAL! Could not initialize User Repository!");
-            ex.printStackTrace();
+            instance = new UserRepository();
         }
+        catch (SQLException ex)
+        {
+            CheffronLogger.log(Level.SEVERE, "Could not initialize User Repository!", ex);
+            System.exit(1);
+        }
+    }
+
+    private UserRepository() throws SQLException
+    {
+        Connection = MySQLDatabase.connect();
+
+        CreateStatement = Connection.prepareStatement("INSERT INTO user (UserId, Username, Email, Name, Password) VALUES ?, ?, ?, ?, ?");
+        ReadStatement = Connection.prepareStatement("SELECT * FROM user WHERE UserId = ?");
+        ReadByEmailStatement = Connection.prepareStatement("SELECT * FROM user WHERE Email = ?");
+        ReadByUsernameStatement = Connection.prepareStatement("SELECT * FROM user WHERE Username = ?");
+        ReadAllStatement = Connection.prepareStatement("SELECT * FROM user");
+        UpdateStatement = Connection.prepareStatement("UPDATE user SET Username = ?, Email = ?, Name = ?, Password = ? WHERE UserId = ?");
+        DeleteStatement = Connection.prepareStatement("DELETE FROM user WHERE UserId = ?");
     }
 
     @Override

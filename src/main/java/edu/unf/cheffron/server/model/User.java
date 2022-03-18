@@ -1,8 +1,5 @@
 package edu.unf.cheffron.server.model;
 
-import java.util.UUID;
-
-import com.sun.net.httpserver.HttpExchange;
 import com.google.gson.JsonObject;
 
 public class User 

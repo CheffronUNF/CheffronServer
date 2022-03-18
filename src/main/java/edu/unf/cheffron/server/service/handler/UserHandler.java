@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.model.User;
 import edu.unf.cheffron.server.repository.UserRepository;
 import edu.unf.cheffron.server.service.AuthService;
@@ -72,7 +73,7 @@ public class UserHandler extends Endpoint implements HttpHandler
         }
         catch (SQLException e) 
         {
-            LOG.log(Level.SEVERE, "Error communicating with database!", e);
+            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
             respondError(exchange, 500, "Internal server error when creating account");
         } 
     }

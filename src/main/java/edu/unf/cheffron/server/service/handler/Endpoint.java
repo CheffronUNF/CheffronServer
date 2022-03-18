@@ -3,15 +3,15 @@ package edu.unf.cheffron.server.service.handler;
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
 
+import edu.unf.cheffron.server.CheffronLogger;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public abstract class Endpoint 
 {
-    protected static final Logger LOG = Logger.getLogger("CheffronWebService");
-    protected static final Gson GSON = new Gson();
+    protected static final Gson gson = new Gson();
 
     protected JsonObject getJsonBody(HttpExchange exchange) 
     {
@@ -33,12 +33,12 @@ public abstract class Endpoint
         } 
         catch (IOException ex) 
         {
-            LOG.log(Level.WARNING, "Could not read line from request body!", ex);
+            CheffronLogger.log(Level.WARNING, "Could not read line from request body!", ex);
             respondError(exchange, 500, "Could not read request");
         } 
         catch (JsonSyntaxException ex) 
         {
-            LOG.log(Level.WARNING, "Received invalid JSON from client!", ex);
+            CheffronLogger.log(Level.WARNING, "Received invalid JSON from client!", ex);
             respondError(exchange, 400, "Invalid json received: " + ex.getMessage());
         }
 
@@ -61,13 +61,13 @@ public abstract class Endpoint
         } 
         catch (IOException ex) 
         {
-            LOG.log(Level.WARNING, "Could not respond to client!", ex);
+            CheffronLogger.log(Level.WARNING, "Could not respond to client!", ex);
         }
     }
 
     protected void respond(HttpExchange exchange, int statusCode, JsonObject body)
      {
-        String json = GSON.toJson(body);
+        String json = gson.toJson(body);
 
         respond(exchange, statusCode, json);
     }

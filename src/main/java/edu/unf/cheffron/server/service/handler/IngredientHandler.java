@@ -5,14 +5,23 @@ import java.io.IOException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import edu.unf.cheffron.server.database.MySQLDatabase;
-
 public class IngredientHandler extends Endpoint implements HttpHandler 
 {
     @Override
     public void handle(HttpExchange exchange) throws IOException 
     {
-        // TODO Auto-generated method stub
-        
+        switch (exchange.getRequestMethod()) 
+        {
+            case "GET":
+                break;
+            case "POST":
+                break;
+            case "PATCH":
+                break;
+            case "DELETE":
+                break;
+            default:
+                throw new Error("Unexpected request type");
+        }
     }
 }

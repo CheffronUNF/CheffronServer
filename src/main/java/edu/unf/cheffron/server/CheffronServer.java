@@ -6,9 +6,9 @@ import edu.unf.cheffron.server.service.WebService;
 import java.io.IOException;
 import java.sql.SQLException;
 
-public class CheffronServer {
-
-    private static final int PORT = 8808;
+public class CheffronServer 
+{
+    public static final int PORT = 8808;
 
     public static void main(String[] args) 
     {

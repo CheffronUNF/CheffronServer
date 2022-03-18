@@ -9,13 +9,13 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import edu.unf.cheffron.server.CheffronLogger;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
@@ -24,16 +24,14 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 public final class AuthService
 {
-    private static final Logger LOG = Logger.getLogger("CheffronWebService");
-
-    private static final String ALGORITHM = "PBKDF2WithHmacSHA1";
     private static final int SIZE = 128;
+    private static final String ALGORITHM = "PBKDF2WithHmacSHA1";
     
     private static final String ID = "$31$";
     private static final Pattern layout = Pattern.compile("\\$31\\$(\\d\\d?)\\$(.{43})");
-
+    
     private static final SecureRandom random = new SecureRandom();
-
+    
     private static final int cost = 16;
     
     private static PrivateKey privateKey;
@@ -54,12 +52,12 @@ public final class AuthService
         }
         catch (IOException | NullPointerException ex) 
         {
-            LOG.log(Level.SEVERE, "FATAL! Public and private keys not found in package! Authentication impossible.");
+            CheffronLogger.log(Level.SEVERE, "FATAL! Public and private keys not found in package! Authentication impossible.");
             System.exit(1);
         } 
         catch (NoSuchAlgorithmException | InvalidKeySpecException ex) 
         {
-            LOG.log(Level.SEVERE, "FATAL! Unable to read public/private key pair!");
+            CheffronLogger.log(Level.SEVERE, "FATAL! Unable to read public/private key pair!");
             System.exit(1);
         }
     }
