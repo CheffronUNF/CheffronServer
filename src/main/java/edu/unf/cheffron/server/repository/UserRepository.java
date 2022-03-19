@@ -80,6 +80,11 @@ public class UserRepository implements Repository<String, User>
         stmt.setString(1, id);
 
         var rs = stmt.executeQuery();
+        if (!rs.next())
+        {
+            return null;
+        }
+        
         return createUserFromRow(rs);
     }
 
@@ -90,6 +95,11 @@ public class UserRepository implements Repository<String, User>
         stmt.setString(1, email);
 
         var rs = stmt.executeQuery();
+        if (!rs.next())
+        {
+            return null;
+        }
+
         return createUserFromRow(rs);
     }
 
@@ -100,6 +110,11 @@ public class UserRepository implements Repository<String, User>
         stmt.setString(1, username);
 
         var rs = stmt.executeQuery();
+        if (!rs.next())
+        {
+            return null;
+        }
+
         return createUserFromRow(rs);
     }
 
@@ -152,11 +167,6 @@ public class UserRepository implements Repository<String, User>
 
     private User createUserFromRow(ResultSet rs) throws SQLException
     {
-        if (!rs.next())
-        {
-            return null;
-        }
-
         String userId = rs.getString("userId");
         String username = rs.getString("username");
         String email = rs.getString("email");
