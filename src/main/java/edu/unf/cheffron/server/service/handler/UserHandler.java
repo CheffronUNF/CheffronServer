@@ -55,9 +55,11 @@ public class UserHandler extends Endpoint implements HttpHandler
 
         try 
         {
-            if (UserRepository.instance.readByUsername(user.getUsername()) != null || UserRepository.instance.readByEmail(user.getEmail()) != null)
-            {
-                respondError(exchange, 400, "User already exists");
+            if (UserRepository.instance.readByUsername(user.getUsername()) != null) {
+                respondError(exchange, 400, "Username already exists");
+                return;
+            } else if (UserRepository.instance.readByEmail(user.getEmail()) != null) {
+                respondError(exchange, 400, "Email already exists");
                 return;
             }
 
