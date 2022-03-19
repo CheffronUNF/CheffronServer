@@ -38,7 +38,7 @@ public class UserRepository implements Repository<String, User>
     {
         Connection = MySQLDatabase.connect();
 
-        CreateStatement = Connection.prepareStatement("INSERT INTO user (UserId, Username, Email, Name, Password) VALUES ?, ?, ?, ?, ?");
+        CreateStatement = Connection.prepareStatement("INSERT INTO user (UserId, Username, Email, Name, Password) VALUES (?, ?, ?, ?, ?)");
         ReadStatement = Connection.prepareStatement("SELECT * FROM user WHERE UserId = ?");
         ReadByEmailStatement = Connection.prepareStatement("SELECT * FROM user WHERE Email = ?");
         ReadByUsernameStatement = Connection.prepareStatement("SELECT * FROM user WHERE Username = ?");
