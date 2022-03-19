@@ -3,7 +3,6 @@ package edu.unf.cheffron.server.service.handler;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
 import edu.unf.cheffron.server.model.User;
 import edu.unf.cheffron.server.repository.UserRepository;
 import edu.unf.cheffron.server.service.AuthService;
@@ -19,7 +18,7 @@ public class AuthHandler extends Endpoint implements HttpHandler
     @Override
     public void handle(HttpExchange exchange) throws IOException
     {
-        switch (exchange.getRequestMethod()) 
+        switch (exchange.getRequestMethod())
         {
             case "GET":
                 login(exchange);
@@ -77,17 +76,17 @@ public class AuthHandler extends Endpoint implements HttpHandler
         }
 
         String username = userpass[0];
-        String password = userpass[1];
+        String password = Base64.getEncoder().encodeToString(userpass[1].getBytes());
 
-        try 
+        try
         {
             User user = UserRepository.instance.readByUsername(username);
 
-            if (!AuthService.authenticate(password.toCharArray(), user.getPassword())) 
+            if (!AuthService.authenticate(password.toCharArray(), user.getPassword()))
             {
                 respondError(exchange, 401, "Login failed");
-            } 
-            else 
+            }
+            else
             {
                 String jwt = AuthService.createJWT(user.getUserId(), username);
 
@@ -97,7 +96,7 @@ public class AuthHandler extends Endpoint implements HttpHandler
                 respond(exchange, 200, response);
             }
         }
-        catch (SQLException e) 
+        catch (SQLException e)
         {
             respondError(exchange, 500, "Internal server error encountered when validating login");
         }

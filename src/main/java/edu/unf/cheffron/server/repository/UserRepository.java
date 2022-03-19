@@ -13,7 +13,7 @@ public class UserRepository implements Repository<String, User>
 
     private final Connection Connection;
 
-    private final static String CreateStatement = "INSERT INTO user (UserId, Username, Email, Name, Password) VALUES ?, ?, ?, ?, ?";
+    private final static String CreateStatement = "INSERT INTO user (UserId, Username, Email, Name, Password) VALUES (?, ?, ?, ?, ?)";
     private final static String ReadStatement = "SELECT * FROM user WHERE UserId = ?";
     private final static String ReadByEmailStatement = "SELECT * FROM user WHERE Email = ?";
     private final static String ReadByUsernameStatement = "SELECT * FROM user WHERE Username = ?";
