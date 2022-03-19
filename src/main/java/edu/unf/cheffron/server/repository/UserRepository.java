@@ -13,13 +13,13 @@ public class UserRepository implements Repository<String, User>
 
     private final Connection Connection;
 
-    private final PreparedStatement CreateStatement;
-    private final PreparedStatement ReadStatement;
-    private final PreparedStatement ReadByEmailStatement;
-    private final PreparedStatement ReadByUsernameStatement;
-    private final PreparedStatement ReadAllStatement;
-    private final PreparedStatement UpdateStatement;
-    private final PreparedStatement DeleteStatement;
+    private final static String CreateStatement = "INSERT INTO user (UserId, Username, Email, Name, Password) VALUES ?, ?, ?, ?, ?";
+    private final static String ReadStatement = "SELECT * FROM user WHERE UserId = ?";
+    private final static String ReadByEmailStatement = "SELECT * FROM user WHERE Email = ?";
+    private final static String ReadByUsernameStatement = "SELECT * FROM user WHERE Username = ?";
+    private final static String ReadAllStatement = "SELECT * FROM user";
+    private final static String UpdateStatement = "UPDATE user SET Username = ?, Email = ?, Name = ?, Password = ? WHERE UserId = ?";
+    private final static String DeleteStatement = "DELETE FROM user WHERE UserId = ?";
 
     static
     {
@@ -37,26 +37,20 @@ public class UserRepository implements Repository<String, User>
     private UserRepository() throws SQLException
     {
         Connection = MySQLDatabase.connect();
-
-        CreateStatement = Connection.prepareStatement("INSERT INTO user (UserId, Username, Email, Name, Password) VALUES ?, ?, ?, ?, ?");
-        ReadStatement = Connection.prepareStatement("SELECT * FROM user WHERE UserId = ?");
-        ReadByEmailStatement = Connection.prepareStatement("SELECT * FROM user WHERE Email = ?");
-        ReadByUsernameStatement = Connection.prepareStatement("SELECT * FROM user WHERE Username = ?");
-        ReadAllStatement = Connection.prepareStatement("SELECT * FROM user");
-        UpdateStatement = Connection.prepareStatement("UPDATE user SET Username = ?, Email = ?, Name = ?, Password = ? WHERE UserId = ?");
-        DeleteStatement = Connection.prepareStatement("DELETE FROM user WHERE UserId = ?");
     }
 
     @Override
     public User create(User item) throws SQLException
     {
-        CreateStatement.setString(1, item.getUserId());
-        CreateStatement.setString(2, item.getUsername());
-        CreateStatement.setString(3, item.getEmail());
-        CreateStatement.setString(4, item.getName());
-        CreateStatement.setString(5, item.getPassword());
+        var stmt = Connection.prepareStatement(CreateStatement);
 
-        CreateStatement.executeUpdate();
+        stmt.setString(1, item.getUserId());
+        stmt.setString(2, item.getUsername());
+        stmt.setString(3, item.getEmail());
+        stmt.setString(4, item.getName());
+        stmt.setString(5, item.getPassword());
+
+        stmt.executeUpdate();
 
         return item;
     }
@@ -64,11 +58,12 @@ public class UserRepository implements Repository<String, User>
     @Override
     public User[] read() throws SQLException
     {
-        var rs = ReadAllStatement.executeQuery();
+        var stmt = Connection.prepareStatement(ReadAllStatement);
+
+        var rs = stmt.executeQuery();
         var size = getResultSetSize(rs);
 
         var res = new User[size];
-
         while (rs.next())
         {
             res[rs.getRow() - 1] = createUserFromRow(rs);
@@ -80,56 +75,46 @@ public class UserRepository implements Repository<String, User>
     @Override
     public User read(String id) throws SQLException
     {
-        ReadStatement.setString(1, id);
+        var stmt = Connection.prepareStatement(ReadStatement);
 
-        var rs = ReadStatement.executeQuery();
+        stmt.setString(1, id);
 
-        if (!rs.next())
-        {
-            return null;
-        }
-
+        var rs = stmt.executeQuery();
         return createUserFromRow(rs);
     }
 
     public User readByEmail(String email) throws SQLException
     {
-        ReadByEmailStatement.setString(1, email);
+        var stmt = Connection.prepareStatement(ReadByEmailStatement);
 
-        var rs = ReadByEmailStatement.executeQuery();
+        stmt.setString(1, email);
 
-        if (!rs.next())
-        {
-            return null;
-        }
-
+        var rs = stmt.executeQuery();
         return createUserFromRow(rs);
     }
 
     public User readByUsername(String username) throws SQLException
     {
-        ReadByUsernameStatement.setString(1, username);
+        var stmt = Connection.prepareStatement(ReadByUsernameStatement);
 
-        var rs = ReadByUsernameStatement.executeQuery();
+        stmt.setString(1, username);
 
-        if (!rs.next())
-        {
-            return null;
-        }
-
+        var rs = stmt.executeQuery();
         return createUserFromRow(rs);
     }
 
     @Override
     public User update(String id, User item) throws SQLException
     {
-        UpdateStatement.setString(1, item.getUsername());
-        UpdateStatement.setString(2, item.getEmail());
-        UpdateStatement.setString(3, item.getName());
-        UpdateStatement.setString(4, item.getPassword());
-        UpdateStatement.setString(5, id);
+        var stmt = Connection.prepareStatement(UpdateStatement);
 
-        UpdateStatement.executeUpdate();
+        stmt.setString(1, item.getUsername());
+        stmt.setString(2, item.getEmail());
+        stmt.setString(3, item.getName());
+        stmt.setString(4, item.getPassword());
+        stmt.setString(5, id);
+
+        stmt.executeUpdate();
 
         return new User(id, item.getUsername(), item.getEmail(), item.getName(), item.getPassword(), item.getChefHatsReceived());
     }
@@ -137,9 +122,11 @@ public class UserRepository implements Repository<String, User>
     @Override
     public boolean delete(String id) throws SQLException
     {
-        DeleteStatement.setString(1, id);
+        var stmt = Connection.prepareStatement(DeleteStatement);
 
-        return DeleteStatement.executeUpdate() > 0;
+        stmt.setString(1, id);
+
+        return stmt.executeUpdate() > 0;
     }
 
     private int getResultSetSize(ResultSet rs)
@@ -165,6 +152,11 @@ public class UserRepository implements Repository<String, User>
 
     private User createUserFromRow(ResultSet rs) throws SQLException
     {
+        if (!rs.next())
+        {
+            return null;
+        }
+
         String userId = rs.getString("userId");
         String username = rs.getString("username");
         String email = rs.getString("email");
