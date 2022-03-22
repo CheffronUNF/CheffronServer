@@ -11,9 +11,9 @@ public class Recipe
 {
     public final String id, name;
     public final Iterable<String> directions;
-    public final Iterable<Ingredient> ingredients;
+    public final Iterable<RecipeIngredient> ingredients;
 
-    public Recipe(String id, String name, Iterable<String> directions, Iterable<Ingredient> ingredients)
+    public Recipe(String id, String name, Iterable<String> directions, Iterable<RecipeIngredient> ingredients)
     {
         this.id = id;
         this.name = name;
@@ -36,7 +36,7 @@ public class Recipe
         return directions;
     }
 
-    public Iterable<Ingredient> getIngredients()
+    public Iterable<RecipeIngredient> getIngredients()
     {
         return ingredients;
     }
@@ -61,10 +61,10 @@ public class Recipe
 
         arr = json.getAsJsonArray("ingredients");
 
-        List<Ingredient> ingredients = new ArrayList<>();
+        List<RecipeIngredient> ingredients = new ArrayList<>();
         for (JsonElement element : arr) 
         {
-            ingredients.add(Ingredient.fromJson(element.getAsJsonObject()));
+            ingredients.add(RecipeIngredient.fromJson(element.getAsJsonObject()));
         }
 
         return new Recipe(id, name, directions, ingredients);

@@ -2,11 +2,11 @@ package edu.unf.cheffron.server.model;
 
 import com.google.gson.JsonObject;
 
-public class Ingredient 
+public class RecipeIngredient
 {
     private final String id, name, quantity, unit;
 
-    public Ingredient(String id, String name, String quantity, String unit)
+    public RecipeIngredient(String id, String name, String quantity, String unit)
     {
         this.id = id;
         this.name = name;
@@ -34,7 +34,7 @@ public class Ingredient
         return unit;
     }
 
-    public static Ingredient fromJson(JsonObject json)
+    public static RecipeIngredient fromJson(JsonObject json)
     {
         if (!json.has("id") || !json.has("name") || !json.has("quantity") || !json.has("unit"))
         {
@@ -46,6 +46,6 @@ public class Ingredient
         String quantity = json.get("quantity").getAsString();
         String unit = json.get("unit").getAsString();
 
-        return new Ingredient(id, name, quantity, unit);
+        return new RecipeIngredient(id, name, quantity, unit);
     } 
 }

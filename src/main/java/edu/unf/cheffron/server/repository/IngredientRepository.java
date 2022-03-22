@@ -7,9 +7,9 @@ import java.util.logging.Level;
 
 import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.database.MySQLDatabase;
-import edu.unf.cheffron.server.model.Ingredient;
+import edu.unf.cheffron.server.model.RecipeIngredient;
 
-public class IngredientRepository implements Repository<String, Ingredient>
+public class IngredientRepository implements Repository<String, RecipeIngredient>
 {
     public static IngredientRepository instance;
 
@@ -48,28 +48,28 @@ public class IngredientRepository implements Repository<String, Ingredient>
     }
 
     @Override
-    public Ingredient create(Ingredient item) throws SQLException 
+    public RecipeIngredient create(RecipeIngredient item) throws SQLException
     {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Ingredient[] read() throws SQLException 
+    public RecipeIngredient[] read() throws SQLException
     {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Ingredient read(String id) throws SQLException 
+    public RecipeIngredient read(String id) throws SQLException
     {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Ingredient update(String id, Ingredient item) throws SQLException 
+    public RecipeIngredient update(String id, RecipeIngredient item) throws SQLException
     {
         // TODO Auto-generated method stub
         return null;
