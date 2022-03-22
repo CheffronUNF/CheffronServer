@@ -2,6 +2,7 @@ package edu.unf.cheffron.server.repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
@@ -9,17 +10,17 @@ import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.database.MySQLDatabase;
 import edu.unf.cheffron.server.model.Recipe;
 
-public class RecipeRepository implements Repository<String, Recipe>
+public class RecipeRepository extends Repository<String, Recipe>
 {
     public static RecipeRepository instance;
 
     private final Connection Connection;
 
-    private final PreparedStatement CreateStatement;
-    private final PreparedStatement ReadStatement;
-    private final PreparedStatement ReadAllStatement;
-    private final PreparedStatement UpdateStatement;
-    private final PreparedStatement DeleteStatement;
+    private final String CreateStatement = "";
+    private final String ReadStatement = "";
+    private final String ReadAllStatement = "";
+    private final String UpdateStatement = "";
+    private final String DeleteStatement = "";
 
     static
     {
@@ -37,12 +38,6 @@ public class RecipeRepository implements Repository<String, Recipe>
     private RecipeRepository() throws SQLException
     {
         Connection = MySQLDatabase.connect();
-        
-        CreateStatement = Connection.prepareStatement("");
-        ReadStatement = Connection.prepareStatement("");
-        ReadAllStatement = Connection.prepareStatement("");
-        UpdateStatement = Connection.prepareStatement("");
-        DeleteStatement = Connection.prepareStatement("");
 
         throw new UnsupportedOperationException();
     }
@@ -55,10 +50,8 @@ public class RecipeRepository implements Repository<String, Recipe>
     }
 
     @Override
-    public Recipe[] read() throws SQLException 
-    {
-        // TODO Auto-generated method stub
-        return null;
+    public String getReadAllStatement() {
+        return ReadAllStatement;
     }
 
     @Override
@@ -81,5 +74,9 @@ public class RecipeRepository implements Repository<String, Recipe>
         // TODO Auto-generated method stub
         return false;
     }
-    
+
+    @Override
+    Recipe createFromRow(ResultSet rs) throws SQLException {
+        return null;
+    }
 }

@@ -7,7 +7,7 @@ import edu.unf.cheffron.server.model.User;
 import java.sql.*;
 import java.util.logging.Level;
 
-public class UserRepository implements Repository<String, User>
+public class UserRepository extends Repository<String, User>
 {
     public static UserRepository instance;
 
@@ -56,20 +56,8 @@ public class UserRepository implements Repository<String, User>
     }
 
     @Override
-    public User[] read() throws SQLException
-    {
-        var stmt = Connection.prepareStatement(ReadAllStatement);
-
-        var rs = stmt.executeQuery();
-        var size = getResultSetSize(rs);
-
-        var res = new User[size];
-        while (rs.next())
-        {
-            res[rs.getRow() - 1] = createUserFromRow(rs);
-        }
-
-        return res;
+    public String getReadAllStatement() {
+        return ReadAllStatement;
     }
 
     @Override
@@ -85,7 +73,7 @@ public class UserRepository implements Repository<String, User>
             return null;
         }
         
-        return createUserFromRow(rs);
+        return createFromRow(rs);
     }
 
     public User readByEmail(String email) throws SQLException
@@ -100,7 +88,7 @@ public class UserRepository implements Repository<String, User>
             return null;
         }
 
-        return createUserFromRow(rs);
+        return createFromRow(rs);
     }
 
     public User readByUsername(String username) throws SQLException
@@ -115,7 +103,7 @@ public class UserRepository implements Repository<String, User>
             return null;
         }
 
-        return createUserFromRow(rs);
+        return createFromRow(rs);
     }
 
     @Override
@@ -144,28 +132,7 @@ public class UserRepository implements Repository<String, User>
         return stmt.executeUpdate() > 0;
     }
 
-    private int getResultSetSize(ResultSet rs)
-    {
-        int size = 0;
-
-        try
-        {
-            int index = rs.getRow();
-
-            rs.last();
-            rs.getRow();
-
-            rs.absolute(index);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return size;
-    }
-
-    private User createUserFromRow(ResultSet rs) throws SQLException
+    protected User createFromRow(ResultSet rs) throws SQLException
     {
         String userId = rs.getString("userId");
         String username = rs.getString("username");
