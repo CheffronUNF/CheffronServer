@@ -1,9 +1,13 @@
 package edu.unf.cheffron.server.service.handler;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import edu.unf.cheffron.server.model.Ingredient;
+import edu.unf.cheffron.server.repository.IngredientRepository;
 
 public class IngredientHandler extends Endpoint implements HttpHandler 
 {
@@ -13,15 +17,20 @@ public class IngredientHandler extends Endpoint implements HttpHandler
         switch (exchange.getRequestMethod()) 
         {
             case "GET":
-                break;
-            case "POST":
-                break;
-            case "PATCH":
-                break;
-            case "DELETE":
+                getAllIngredients(exchange);
                 break;
             default:
-                throw new Error("Unexpected request type");
+                respondError(exchange, 400, "Invalid request method!");
+        }
+    }
+
+    private void getAllIngredients(HttpExchange exchange) {
+        try {
+            List<Ingredient> ingredients = IngredientRepository.instance.read();
+            respond(exchange, 200, gson.toJson(ingredients));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            respondError(exchange, 500, "Error when getting ingredients");
         }
     }
 }
