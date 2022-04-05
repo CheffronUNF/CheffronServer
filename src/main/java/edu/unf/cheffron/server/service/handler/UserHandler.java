@@ -1,6 +1,8 @@
 package edu.unf.cheffron.server.service.handler;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -22,22 +24,46 @@ public class UserHandler extends Endpoint implements HttpHandler
         switch (exchange.getRequestMethod()) 
         {
             case "GET":
+                getUser(exchange);
                 break;
             case "POST":
                 createUser(exchange);
                 break;
             case "PATCH":
+                updateUser(exchange);
                 break;
             case "DELETE":
+                deleteUser(exchange);
                 break;
             default:
-                throw new Error("Unexpected request type");
+                respondError(exchange, 400, "Invalid request method!");
         }
     }
 
     private void getUser(HttpExchange exchange)
     {
+        var json = getJsonBody(exchange);
+        var userId = json.get("userId").getAsString();
 
+        try 
+        {
+            var user = UserRepository.instance.read(userId);
+
+            Gson gson = new Gson();
+            var res = gson.toJson(user);
+
+            json = JsonParser.parseString(res).getAsJsonObject();
+            json.remove("name");
+            json.remove("email");
+            json.remove("password");
+
+            respond(exchange, 200, json);
+        } 
+        catch (SQLException e) 
+        {
+            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
+            respondError(exchange, 500, "Internal server error");
+        }
     }
 
     private void createUser(HttpExchange exchange) 
@@ -86,7 +112,7 @@ public class UserHandler extends Endpoint implements HttpHandler
         catch (SQLException e) 
         {
             CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
-            respondError(exchange, 500, "Internal server error when creating account");
+            respondError(exchange, 500, "Internal server error");
         } 
     }
 
@@ -96,27 +122,51 @@ public class UserHandler extends Endpoint implements HttpHandler
 
         if (userId == null)
         {
-            respond(exchange, 401, "Must be logged in to update user.");
+            respond(exchange, 401, "Must be logged in.");
             return;
         }
 
         var json = getJsonBody(exchange);
         var user = User.fromJson(json);
-
+        
+        if (user == null)
+        {
+            respond(exchange, 406, "Missing required field.");
+        }
+        
         try 
         {
+            var userOriginal = UserRepository.instance.read(userId);
+
+            user = new User(userId, user.username(), user.email(), user.name(), userOriginal.password(), userOriginal.chefHatsReceived());
+
             UserRepository.instance.update(userId, user);
             respond(exchange, 200, "User updated");
         } 
         catch (SQLException e) 
         {
             CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
-            respondError(exchange, 500, "Internal server error when updating account");
+            respondError(exchange, 500, "Internal server error");
         }
     }
 
     private void deleteUser(HttpExchange exchange)
     {
+        var userId = AuthService.authenticateRequest(exchange);
 
+        if (userId == null)
+        {
+            respond(exchange, 401, "Must be logged in.");
+        }
+
+        try 
+        {
+            UserRepository.instance.delete(userId);
+        } 
+        catch (SQLException e) 
+        {
+            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
+            respondError(exchange, 500, "Internal server error");
+        }
     }
 }

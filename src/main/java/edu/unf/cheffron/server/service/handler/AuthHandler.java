@@ -3,13 +3,15 @@ package edu.unf.cheffron.server.service.handler;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
+import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.model.User;
 import edu.unf.cheffron.server.repository.UserRepository;
 import edu.unf.cheffron.server.service.AuthService;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Base64;
+import java.util.logging.Level;
 
 public class AuthHandler extends Endpoint implements HttpHandler
 {
@@ -30,7 +32,7 @@ public class AuthHandler extends Endpoint implements HttpHandler
             case "DELETE":
                 break;
             default:
-                throw new Error("Unexpected request type");
+                respondError(exchange, 400, "Invalid request method!");
         }
     }
 
@@ -71,24 +73,21 @@ public class AuthHandler extends Endpoint implements HttpHandler
 
         if (userpass.length != 2)
         {
-            respondError(exchange, 401, "Incorrect username or password");
+            respondError(exchange, 401, "Missing username or password");
             return;
         }
 
-        String username = userpass[0];
-        String password = Base64.getEncoder().encodeToString(userpass[1].getBytes());
-
         try
         {
-            User user = UserRepository.instance.readByUsername(username);
+            User user = UserRepository.instance.readByUsername(userpass[0]);
 
-            if (!AuthService.authenticate(password.toCharArray(), user.getPassword()))
+            if (!AuthService.authenticate(userpass[1].toCharArray(), user.password()))
             {
-                respondError(exchange, 401, "Login failed");
+                respondError(exchange, 401, "Incorrent username or password");
             }
             else
             {
-                String jwt = AuthService.createJWT(user.getUserId(), username);
+                String jwt = AuthService.createJWT(user.userId(), userpass[0]);
 
                 JsonObject response = new JsonObject();
                 response.addProperty("jwt", jwt);
@@ -96,9 +95,10 @@ public class AuthHandler extends Endpoint implements HttpHandler
                 respond(exchange, 200, response);
             }
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
             respondError(exchange, 500, "Internal server error encountered when validating login");
+            CheffronLogger.log(Level.WARNING, e.getMessage());
         }
     }
 }

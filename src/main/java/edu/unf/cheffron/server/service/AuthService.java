@@ -12,6 +12,8 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sun.net.httpserver.HttpExchange;
+
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
@@ -70,6 +72,18 @@ public final class AuthService
                 .setIssuedAt(new Date())
                 .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
+    }
+
+    public static String authenticateRequest(HttpExchange exchange)
+    {
+        var jws = exchange.getRequestHeaders().get("jws");
+        
+        if (jws.size() == 0)
+        {
+            return null;
+        }
+
+        return authenticateJWT(jws.get(0));
     }
 
     public static String authenticateJWT(String jws) 
