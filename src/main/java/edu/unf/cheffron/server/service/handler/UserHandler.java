@@ -1,6 +1,6 @@
 package edu.unf.cheffron.server.service.handler;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
@@ -14,6 +14,7 @@ import edu.unf.cheffron.server.service.AuthService;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 public class UserHandler extends Endpoint implements HttpHandler 
@@ -48,8 +49,6 @@ public class UserHandler extends Endpoint implements HttpHandler
         try 
         {
             var user = UserRepository.instance.read(userId);
-
-            Gson gson = new Gson();
             var res = gson.toJson(user);
 
             json = JsonParser.parseString(res).getAsJsonObject();
@@ -127,20 +126,27 @@ public class UserHandler extends Endpoint implements HttpHandler
         }
 
         var json = getJsonBody(exchange);
-        var user = User.fromJson(json);
-        
-        if (user == null)
-        {
-            respond(exchange, 406, "Missing required field.");
-        }
         
         try 
         {
-            var userOriginal = UserRepository.instance.read(userId);
+            var userOrig = UserRepository.instance.read(userId);
+            var jsonOrig = JsonParser.parseString(gson.toJson(userOrig)).getAsJsonObject();
 
-            user = new User(userId, user.username(), user.email(), user.name(), userOriginal.password(), userOriginal.chefHatsReceived());
+            var jsonSet = json.entrySet();
+            for (Entry<String,JsonElement> entry : jsonSet) 
+            {
+                if (entry.getKey().equals("userId") || entry.getKey().equals("password"))
+                {
+                    continue;
+                }
 
+                jsonOrig.remove(entry.getKey());
+                jsonOrig.add(entry.getKey(), entry.getValue());
+            }
+
+            var user = User.fromJson(jsonOrig);
             UserRepository.instance.update(userId, user);
+
             respond(exchange, 200, "User updated");
         } 
         catch (SQLException e) 

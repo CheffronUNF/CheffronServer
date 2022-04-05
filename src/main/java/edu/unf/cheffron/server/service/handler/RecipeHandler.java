@@ -10,7 +10,18 @@ public class RecipeHandler extends Endpoint implements HttpHandler
     @Override
     public void handle(HttpExchange exchange) throws IOException 
     {
-        // TODO Auto-generated method stub
-        
+        switch (exchange.getRequestMethod()) 
+        {
+            case "GET":
+                break;
+            case "POST":
+                break;
+            case "PATCH":
+                break;
+            case "DELETE":
+                break;
+            default:
+                respondError(exchange, 400, "Invalid request method!");
+        }
     }
 }

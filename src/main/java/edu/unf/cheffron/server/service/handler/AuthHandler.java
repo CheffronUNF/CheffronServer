@@ -25,12 +25,6 @@ public class AuthHandler extends Endpoint implements HttpHandler
             case "GET":
                 login(exchange);
                 break;
-            case "POST":
-                break;
-            case "PATCH":
-                break;
-            case "DELETE":
-                break;
             default:
                 respondError(exchange, 400, "Invalid request method!");
         }
