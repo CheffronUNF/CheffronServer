@@ -15,16 +15,19 @@ public class PantryRepository extends Repository<String, Pantry> {
 
     public static final PantryRepository instance = new PantryRepository();
 
-    private static final String createStatement = "INSERT INTO link_user_ingredient" +
-            "(userID, ingredientID, Amount, MeasurementType) VALUES (?, ?, ?, ?)";
+    private static final String createStatement = "INSERT INTO link_user_ingredient (userID, ingredientID, Amount, MeasurementType) VALUES (?, ?, ?, ?)";
     private static final String readStatement = "SELECT * FROM link_user_ingredient WHERE userID = ?";
     private static final String deleteStatement = "DELETE FROM link_user_ingredient WHERE userID = ?";
 
     @Override
-    public Pantry create(Pantry item) throws SQLException {
-        for (RecipeIngredient recipeIngredient : item.ingredients()) {
+    public Pantry create(Pantry item) throws SQLException 
+    {
+        for (RecipeIngredient recipeIngredient : item.ingredients()) 
+        {
             Ingredient ingredient = IngredientRepository.instance.readByName(recipeIngredient.name());
-            if (ingredient == null) {
+
+            if (ingredient == null) 
+            {
                 ingredient = new Ingredient(UUID.randomUUID().toString(), recipeIngredient.name());
                 IngredientRepository.instance.create(ingredient);
             }
@@ -43,17 +46,20 @@ public class PantryRepository extends Repository<String, Pantry> {
     }
 
     @Override
-    protected String getReadAllStatement() {
+    protected String getReadAllStatement() 
+    {
         return null;
     }
 
     @Override
-    public List<Pantry> read() throws SQLException {
+    public List<Pantry> read() throws SQLException 
+    {
         throw new UnsupportedOperationException("Cannot read all pantries!");
     }
 
     @Override
-    public Pantry read(String id) throws SQLException {
+    public Pantry read(String id) throws SQLException 
+    {
         var stmt = MySQLDatabase.connect().prepareStatement(readStatement);
         stmt.setString(1, id);
 
@@ -62,27 +68,34 @@ public class PantryRepository extends Repository<String, Pantry> {
     }
 
     @Override
-    public Pantry update(String id, Pantry item) throws SQLException {
+    public Pantry update(String id, Pantry item) throws SQLException 
+    {
         delete(id);
-        return create(item);
+
+        var updated = new Pantry(id, item.ingredients());
+
+        return create(updated);
     }
 
     @Override
-    public boolean delete(String id) throws SQLException {
+    public boolean delete(String id) throws SQLException 
+    {
         var stmt = MySQLDatabase.connect().prepareStatement(deleteStatement);
         stmt.setString(1, id);
         return stmt.executeUpdate() > 0;
     }
 
     @Override
-    public Pantry createFromRow(ResultSet rs) throws SQLException {
+    public Pantry createFromRow(ResultSet rs) throws SQLException 
+    {
         var lines = getResultSetSize(rs);
 
         List<RecipeIngredient> ingredients = new ArrayList<>(lines);
 
         String userId = null;
 
-        while (rs.next()) {
+        while (rs.next()) 
+        {
             userId = rs.getString("userID");
             String ingredientId = rs.getString("ingredientID");
             String name = IngredientRepository.instance.read(ingredientId).name();

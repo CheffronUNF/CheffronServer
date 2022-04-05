@@ -13,13 +13,13 @@ public class IngredientRepository extends Repository<String, Ingredient>
 {
     public static IngredientRepository instance;
 
-    private final Connection Connection;
+    private final Connection connection;
 
-    private final String CreateStatement = "INSERT INTO ingredient(ingredientID, ingredientName) VALUES (?, ?)";
-    private final String ReadStatement = "SELECT ingredientID, ingredientName FROM ingredient WHERE ingredientID = ?";
-    private final String ReadByNameStatement = "SELECT ingredientID, ingredientName FROM ingredient " +
+    private final String createStatement = "INSERT INTO ingredient(ingredientID, ingredientName) VALUES (?, ?)";
+    private final String readStatement = "SELECT ingredientID, ingredientName FROM ingredient WHERE ingredientID = ?";
+    private final String readByNameStatement = "SELECT ingredientID, ingredientName FROM ingredient " +
             "WHERE ingredientName = ?";
-    private final String ReadAllStatement = "SELECT ingredientID, ingredientName FROM ingredient";
+    private final String readAllStatement = "SELECT ingredientID, ingredientName FROM ingredient";
 
     static
     {
@@ -36,13 +36,13 @@ public class IngredientRepository extends Repository<String, Ingredient>
 
     private IngredientRepository() throws SQLException
     {
-        Connection = MySQLDatabase.connect();
+        connection = MySQLDatabase.connect();
     }
 
     @Override
     public Ingredient create(Ingredient item) throws SQLException
     {
-        var stmt = Connection.prepareStatement(CreateStatement);
+        var stmt = connection.prepareStatement(createStatement);
 
         stmt.setString(1, item.id());
         stmt.setString(2, item.name());
@@ -54,13 +54,13 @@ public class IngredientRepository extends Repository<String, Ingredient>
 
     @Override
     public String getReadAllStatement() {
-        return ReadAllStatement;
+        return readAllStatement;
     }
 
     @Override
     public Ingredient read(String id) throws SQLException
     {
-        var stmt = Connection.prepareStatement(ReadStatement);
+        var stmt = connection.prepareStatement(readStatement);
         stmt.setString(1, id);
 
         var rs = stmt.executeQuery();
@@ -73,7 +73,7 @@ public class IngredientRepository extends Repository<String, Ingredient>
     }
 
     public Ingredient readByName(String name) throws SQLException {
-        var stmt = Connection.prepareStatement(ReadByNameStatement);
+        var stmt = connection.prepareStatement(readByNameStatement);
         stmt.setString(1, name);
 
         var rs = stmt.executeQuery();

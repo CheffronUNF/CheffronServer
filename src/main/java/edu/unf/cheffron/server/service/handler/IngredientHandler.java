@@ -24,11 +24,15 @@ public class IngredientHandler extends Endpoint implements HttpHandler
         }
     }
 
-    private void getAllIngredients(HttpExchange exchange) {
-        try {
+    private void getAllIngredients(HttpExchange exchange) 
+    {
+        try 
+        {
             List<Ingredient> ingredients = IngredientRepository.instance.read();
             respond(exchange, 200, gson.toJson(ingredients));
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e) 
+        {
             e.printStackTrace();
             respondError(exchange, 500, "Error when getting ingredients");
         }

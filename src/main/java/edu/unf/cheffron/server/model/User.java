@@ -2,49 +2,11 @@ package edu.unf.cheffron.server.model;
 
 import com.google.gson.JsonObject;
 
-public class User 
+public record User(String userId, String username, String email, String name, String password, int chefHatsReceived) 
 {
-    private final String userId, username, email, name, password;
-    private final int chefHatsReceived;
-
-    public User(String userId, String username, String email, String name, String password, int chefHatsReceived) 
+    public User
     {
-        this.userId = userId;
-        this.username = username;
-        this.email = email;
-        this.name = name;
-        this.password = password;
-        this.chefHatsReceived = chefHatsReceived;
-    }
-
-    public String getUserId() 
-    {
-        return userId;
-    }
-
-    public String getUsername() 
-    {
-        return username;
-    }
-
-    public String getEmail() 
-    {
-        return email;
-    }
-
-    public String getName() 
-    {
-        return name;
-    }
-
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public int getChefHatsReceived() 
-    {
-        return chefHatsReceived;
+        
     }
 
     public static User fromJson(JsonObject json)

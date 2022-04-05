@@ -7,38 +7,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public class Recipe 
+public record Recipe(String id, String name, Iterable<String> directions, Iterable<RecipeIngredient> ingredients) 
 {
-    public final String id, name;
-    public final Iterable<String> directions;
-    public final Iterable<RecipeIngredient> ingredients;
-
-    public Recipe(String id, String name, Iterable<String> directions, Iterable<RecipeIngredient> ingredients)
+    public Recipe
     {
-        this.id = id;
-        this.name = name;
-        this.directions = directions;
-        this.ingredients = ingredients;
-    }
 
-    public String getId()
-    {
-        return id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public Iterable<String> getDirections()
-    {
-        return directions;
-    }
-
-    public Iterable<RecipeIngredient> getIngredients()
-    {
-        return ingredients;
     }
 
     public static Recipe fromJson(JsonObject json)

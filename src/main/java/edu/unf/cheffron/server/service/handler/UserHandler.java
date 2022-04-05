@@ -35,6 +35,11 @@ public class UserHandler extends Endpoint implements HttpHandler
         }
     }
 
+    private void getUser(HttpExchange exchange)
+    {
+
+    }
+
     private void createUser(HttpExchange exchange) 
     {
         JsonObject json = getJsonBody(exchange);
@@ -42,6 +47,7 @@ public class UserHandler extends Endpoint implements HttpHandler
         if (json == null)
         {
             respondError(exchange, 400, "Invalid json data received.");
+            return;
         }
 
         json.addProperty("userId", UUID.randomUUID().toString());
@@ -55,18 +61,22 @@ public class UserHandler extends Endpoint implements HttpHandler
 
         try 
         {
-            if (UserRepository.instance.readByUsername(user.getUsername()) != null) {
+            if (UserRepository.instance.readByUsername(user.username()) != null) 
+            {
                 respondError(exchange, 400, "Username already exists");
                 return;
-            } else if (UserRepository.instance.readByEmail(user.getEmail()) != null) {
+            } 
+            
+            if (UserRepository.instance.readByEmail(user.email()) != null) 
+            {
                 respondError(exchange, 400, "Email already exists");
                 return;
             }
 
-            String password = AuthService.hash(user.getPassword().toCharArray());
+            String password = AuthService.hash(user.password().toCharArray());
 
-            UserRepository.instance.create(new User(user.getUserId(), user.getUsername(), user.getEmail(), user.getName(), password, 0));
-            String jwt = AuthService.createJWT(user.getUserId(), user.getUsername());
+            UserRepository.instance.create(new User(user.userId(), user.username(), user.email(), user.name(), password, 0));
+            String jwt = AuthService.createJWT(user.userId(), user.username());
 
             JsonObject response = new JsonObject();
             response.addProperty("jwt", jwt);
@@ -78,5 +88,35 @@ public class UserHandler extends Endpoint implements HttpHandler
             CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
             respondError(exchange, 500, "Internal server error when creating account");
         } 
+    }
+
+    private void updateUser(HttpExchange exchange)
+    {
+        var userId = AuthService.authenticateRequest(exchange);
+
+        if (userId == null)
+        {
+            respond(exchange, 401, "Must be logged in to update user.");
+            return;
+        }
+
+        var json = getJsonBody(exchange);
+        var user = User.fromJson(json);
+
+        try 
+        {
+            UserRepository.instance.update(userId, user);
+            respond(exchange, 200, "User updated");
+        } 
+        catch (SQLException e) 
+        {
+            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
+            respondError(exchange, 500, "Internal server error when updating account");
+        }
+    }
+
+    private void deleteUser(HttpExchange exchange)
+    {
+
     }
 }

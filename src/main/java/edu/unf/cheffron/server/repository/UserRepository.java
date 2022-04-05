@@ -11,15 +11,15 @@ public class UserRepository extends Repository<String, User>
 {
     public static UserRepository instance;
 
-    private final Connection Connection;
+    private final Connection connection;
 
-    private final static String CreateStatement = "INSERT INTO user (UserId, Username, Email, Name, Password) VALUES (?, ?, ?, ?, ?)";
-    private final static String ReadStatement = "SELECT * FROM user WHERE UserId = ?";
-    private final static String ReadByEmailStatement = "SELECT * FROM user WHERE Email = ?";
-    private final static String ReadByUsernameStatement = "SELECT * FROM user WHERE Username = ?";
-    private final static String ReadAllStatement = "SELECT * FROM user";
-    private final static String UpdateStatement = "UPDATE user SET Username = ?, Email = ?, Name = ?, Password = ? WHERE UserId = ?";
-    private final static String DeleteStatement = "DELETE FROM user WHERE UserId = ?";
+    private final static String createStatement = "INSERT INTO user (UserId, Username, Email, Name, Password) VALUES (?, ?, ?, ?, ?)";
+    private final static String readStatement = "SELECT * FROM user WHERE UserId = ?";
+    private final static String readByEmailStatement = "SELECT * FROM user WHERE Email = ?";
+    private final static String readByUsernameStatement = "SELECT * FROM user WHERE Username = ?";
+    private final static String readAllStatement = "SELECT * FROM user";
+    private final static String updateStatement = "UPDATE user SET Username = ?, Email = ?, Name = ?, Password = ? WHERE UserId = ?";
+    private final static String deleteStatement = "DELETE FROM user WHERE UserId = ?";
 
     static
     {
@@ -36,19 +36,19 @@ public class UserRepository extends Repository<String, User>
 
     private UserRepository() throws SQLException
     {
-        Connection = MySQLDatabase.connect();
+        connection = MySQLDatabase.connect();
     }
 
     @Override
     public User create(User item) throws SQLException
     {
-        var stmt = Connection.prepareStatement(CreateStatement);
+        var stmt = connection.prepareStatement(createStatement);
 
-        stmt.setString(1, item.getUserId());
-        stmt.setString(2, item.getUsername());
-        stmt.setString(3, item.getEmail());
-        stmt.setString(4, item.getName());
-        stmt.setString(5, item.getPassword());
+        stmt.setString(1, item.userId());
+        stmt.setString(2, item.username());
+        stmt.setString(3, item.email());
+        stmt.setString(4, item.name());
+        stmt.setString(5, item.password());
 
         stmt.executeUpdate();
 
@@ -56,14 +56,15 @@ public class UserRepository extends Repository<String, User>
     }
 
     @Override
-    public String getReadAllStatement() {
-        return ReadAllStatement;
+    public String getReadAllStatement() 
+    {
+        return readAllStatement;
     }
 
     @Override
     public User read(String id) throws SQLException
     {
-        var stmt = Connection.prepareStatement(ReadStatement);
+        var stmt = connection.prepareStatement(readStatement);
 
         stmt.setString(1, id);
 
@@ -78,7 +79,7 @@ public class UserRepository extends Repository<String, User>
 
     public User readByEmail(String email) throws SQLException
     {
-        var stmt = Connection.prepareStatement(ReadByEmailStatement);
+        var stmt = connection.prepareStatement(readByEmailStatement);
 
         stmt.setString(1, email);
 
@@ -93,7 +94,7 @@ public class UserRepository extends Repository<String, User>
 
     public User readByUsername(String username) throws SQLException
     {
-        var stmt = Connection.prepareStatement(ReadByUsernameStatement);
+        var stmt = connection.prepareStatement(readByUsernameStatement);
 
         stmt.setString(1, username);
 
@@ -109,23 +110,23 @@ public class UserRepository extends Repository<String, User>
     @Override
     public User update(String id, User item) throws SQLException
     {
-        var stmt = Connection.prepareStatement(UpdateStatement);
+        var stmt = connection.prepareStatement(updateStatement);
 
-        stmt.setString(1, item.getUsername());
-        stmt.setString(2, item.getEmail());
-        stmt.setString(3, item.getName());
-        stmt.setString(4, item.getPassword());
+        stmt.setString(1, item.username());
+        stmt.setString(2, item.email());
+        stmt.setString(3, item.name());
+        stmt.setString(4, item.password());
         stmt.setString(5, id);
 
         stmt.executeUpdate();
 
-        return new User(id, item.getUsername(), item.getEmail(), item.getName(), item.getPassword(), item.getChefHatsReceived());
+        return new User(id, item.username(), item.email(), item.name(), item.password(), item.chefHatsReceived());
     }
 
     @Override
     public boolean delete(String id) throws SQLException
     {
-        var stmt = Connection.prepareStatement(DeleteStatement);
+        var stmt = connection.prepareStatement(deleteStatement);
 
         stmt.setString(1, id);
 
