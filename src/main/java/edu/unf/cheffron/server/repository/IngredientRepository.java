@@ -1,9 +1,9 @@
 package edu.unf.cheffron.server.repository;
 
-import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.database.MySQLDatabase;
 import edu.unf.cheffron.server.model.Ingredient;
 import edu.unf.cheffron.server.model.RecipeIngredient;
+import edu.unf.cheffron.server.util.CheffronLogger;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

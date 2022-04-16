@@ -6,11 +6,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 
-import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.database.MySQLDatabase;
-import edu.unf.cheffron.server.model.Ingredient;
 import edu.unf.cheffron.server.model.Recipe;
 import edu.unf.cheffron.server.model.RecipeIngredient;
+import edu.unf.cheffron.server.util.CheffronLogger;
 
 public class RecipeRepository extends Repository<String, Recipe>
 {

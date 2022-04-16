@@ -1,7 +1,6 @@
 package edu.unf.cheffron.server;
 
 import edu.unf.cheffron.server.database.MySQLDatabase;
-import edu.unf.cheffron.server.service.WebService;
 
 import java.io.IOException;
 import java.sql.SQLException;

@@ -1,4 +1,4 @@
-package edu.unf.cheffron.server.service;
+package edu.unf.cheffron.server.util;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,14 +17,13 @@ import com.sun.net.httpserver.HttpExchange;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import edu.unf.cheffron.server.CheffronLogger;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-public final class AuthService
+public final class AuthUtil
 {
     private static final int SIZE = 128;
     private static final String ALGORITHM = "PBKDF2WithHmacSHA1";

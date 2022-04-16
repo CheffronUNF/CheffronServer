@@ -1,4 +1,4 @@
-package edu.unf.cheffron.server.service.handler;
+package edu.unf.cheffron.server.router;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -8,8 +8,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import edu.unf.cheffron.server.model.Ingredient;
 import edu.unf.cheffron.server.repository.IngredientRepository;
+import edu.unf.cheffron.server.util.HttpUtil;
 
-public class IngredientHandler extends Endpoint implements HttpHandler 
+public class IngredientRouter implements HttpHandler 
 {
     @Override
     public void handle(HttpExchange exchange) throws IOException 
@@ -20,7 +21,7 @@ public class IngredientHandler extends Endpoint implements HttpHandler
                 getAllIngredients(exchange);
                 break;
             default:
-                respondError(exchange, 400, "Invalid request method!");
+                HttpUtil.respondError(exchange, 400, "Invalid request method!");
         }
     }
 
@@ -29,12 +30,12 @@ public class IngredientHandler extends Endpoint implements HttpHandler
         try 
         {
             List<Ingredient> ingredients = IngredientRepository.instance.read();
-            respond(exchange, 200, gson.toJson(ingredients));
+            HttpUtil.respond(exchange, 200, HttpUtil.toJson(ingredients));
         } 
         catch (SQLException e) 
         {
             e.printStackTrace();
-            respondError(exchange, 500, "Error when getting ingredients");
+            HttpUtil.respondError(exchange, 500, "Error when getting ingredients");
         }
     }
 }

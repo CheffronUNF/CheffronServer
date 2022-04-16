@@ -1,8 +1,8 @@
 package edu.unf.cheffron.server.repository;
 
-import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.database.MySQLDatabase;
 import edu.unf.cheffron.server.model.User;
+import edu.unf.cheffron.server.util.CheffronLogger;
 
 import java.sql.*;
 import java.util.logging.Level;

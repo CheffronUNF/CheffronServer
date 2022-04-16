@@ -1,4 +1,4 @@
-package edu.unf.cheffron.server;
+package edu.unf.cheffron.server.util;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -1,19 +1,27 @@
-package edu.unf.cheffron.server.service.handler;
+package edu.unf.cheffron.server.util;
 
-import com.google.gson.*;
-import com.sun.net.httpserver.HttpExchange;
-
-import edu.unf.cheffron.server.CheffronLogger;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
-public abstract class RequestHandler 
-{
-    protected static final Gson gson = new Gson();
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.sun.net.httpserver.HttpExchange;
 
-    protected JsonObject getJsonBody(HttpExchange exchange) 
+public abstract class HttpUtil 
+{
+    private static final Gson gson = new Gson();
+
+    public static String toJson(Object obj)
+    {
+        return gson.toJson(obj);
+    }
+
+    public static JsonObject getJsonBody(HttpExchange exchange) 
     {
         try 
         {
@@ -22,31 +30,27 @@ public abstract class RequestHandler
 
             if (element == null || element.isJsonNull() || !element.isJsonObject()) 
             {
-                respondError(exchange, 400, "Invalid json received.");
+                return null;
             } 
             else 
             {
-                // return appropriate json object
-                return element.getAsJsonObject();
+                return element.getAsJsonObject(); // return appropriate json object
             }
 
         } 
         catch (IOException ex) 
         {
             CheffronLogger.log(Level.WARNING, "Could not read line from request body!", ex);
-            respondError(exchange, 500, "Could not read request");
         } 
         catch (JsonSyntaxException ex) 
         {
             CheffronLogger.log(Level.WARNING, "Received invalid JSON from client!", ex);
-            respondError(exchange, 400, "Invalid json received: " + ex.getMessage());
         }
 
-        // errored out
-        return null;
+        return null; // errored out
     }
-
-    protected void respond(HttpExchange exchange, int statusCode, String message) 
+    
+    public static void respond(HttpExchange exchange, int statusCode, String message) 
     {
         byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
 
@@ -65,14 +69,14 @@ public abstract class RequestHandler
         }
     }
 
-    protected void respond(HttpExchange exchange, int statusCode, JsonObject body)
+    public static void respond(HttpExchange exchange, int statusCode, JsonObject body)
      {
         String json = gson.toJson(body);
 
         respond(exchange, statusCode, json);
     }
 
-    protected void respondError(HttpExchange exchange, int statusCode, String error) 
+    public static void respondError(HttpExchange exchange, int statusCode, String error) 
     {
         JsonObject object = new JsonObject();
         object.addProperty("error", error);

@@ -1,7 +1,8 @@
-package edu.unf.cheffron.server.service;
+package edu.unf.cheffron.server;
 
 import com.sun.net.httpserver.HttpServer;
-import edu.unf.cheffron.server.service.handler.*;
+
+import edu.unf.cheffron.server.router.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -24,9 +25,9 @@ public class WebService
 
     private void registerContexts() 
     {
-        server.createContext("/auth", new AuthHandler());
-        server.createContext("/ingredient", new IngredientHandler());
-        server.createContext("/recipe", new RecipeHandler());
-        server.createContext("/user", new UserHandler());
+        server.createContext("/auth", new AuthRouter());
+        server.createContext("/ingredient", new IngredientRouter());
+        server.createContext("/recipe", new RecipeRouter());
+        server.createContext("/user", new UserRouter());
     }
 }

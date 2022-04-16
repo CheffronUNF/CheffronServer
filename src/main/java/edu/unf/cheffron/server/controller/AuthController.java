@@ -1,42 +1,28 @@
-package edu.unf.cheffron.server.service.handler;
+package edu.unf.cheffron.server.controller;
 
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
-import edu.unf.cheffron.server.CheffronLogger;
 import edu.unf.cheffron.server.model.User;
 import edu.unf.cheffron.server.repository.UserRepository;
-import edu.unf.cheffron.server.service.AuthService;
+import edu.unf.cheffron.server.util.AuthUtil;
+import edu.unf.cheffron.server.util.CheffronLogger;
+import edu.unf.cheffron.server.util.HttpUtil;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.logging.Level;
 
-public class AuthHandler extends Endpoint implements HttpHandler
+public class AuthController 
 {
     private static final String AuthHeader = "Authorization";
 
-    @Override
-    public void handle(HttpExchange exchange) throws IOException
-    {
-        switch (exchange.getRequestMethod())
-        {
-            case "GET":
-                login(exchange);
-                break;
-            default:
-                respondError(exchange, 400, "Invalid request method!");
-        }
-    }
-
-    private void login(HttpExchange exchange)
+    public void login(HttpExchange exchange)
     {
         var headers = exchange.getRequestHeaders();
 
         if (!headers.containsKey(AuthHeader))
         {
-            respondError(exchange, 401, "No Authorization header");
+            HttpUtil.respondError(exchange, 401, "No Authorization header");
             return;
         }
 
@@ -44,7 +30,7 @@ public class AuthHandler extends Endpoint implements HttpHandler
 
         if (auth.isEmpty())
         {
-            respondError(exchange, 401, "No username or password");
+            HttpUtil.respondError(exchange, 401, "No username or password");
             return;
         }
 
@@ -61,13 +47,13 @@ public class AuthHandler extends Endpoint implements HttpHandler
         }
         catch (Exception ex)
         {
-            respondError(exchange, 401, "Malformed Authorization header");
+            HttpUtil.respondError(exchange, 401, "Malformed Authorization header");
             return;
         }
 
         if (userpass.length != 2)
         {
-            respondError(exchange, 401, "Missing username or password");
+            HttpUtil.respondError(exchange, 401, "Missing username or password");
             return;
         }
 
@@ -75,24 +61,24 @@ public class AuthHandler extends Endpoint implements HttpHandler
         {
             User user = UserRepository.instance.readByUsername(userpass[0]);
 
-            if (!AuthService.authenticate(userpass[1].toCharArray(), user.password()))
+            if (!AuthUtil.authenticate(userpass[1].toCharArray(), user.password()))
             {
-                respondError(exchange, 401, "Incorrent username or password");
+                HttpUtil.respondError(exchange, 401, "Incorrent username or password");
             }
             else
             {
-                String jwt = AuthService.createJWT(user.userId(), userpass[0]);
+                String jwt = AuthUtil.createJWT(user.userId(), userpass[0]);
 
                 JsonObject response = new JsonObject();
                 response.addProperty("jwt", jwt);
 
-                respond(exchange, 200, response);
+                HttpUtil.respond(exchange, 200, response);
             }
         }
         catch (Exception e)
         {
-            respondError(exchange, 500, "Internal server error encountered when validating login");
             CheffronLogger.log(Level.WARNING, e.getMessage());
+            HttpUtil.respondError(exchange, 500, "Internal server error encountered when validating login");
         }
     }
 }

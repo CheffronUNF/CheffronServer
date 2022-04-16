@@ -1,11 +1,13 @@
-package edu.unf.cheffron.server.service.handler;
+package edu.unf.cheffron.server.router;
 
 import java.io.IOException;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-public class RecipeHandler extends RequestHandler implements HttpHandler 
+import edu.unf.cheffron.server.util.HttpUtil;
+
+public class RecipeRouter implements HttpHandler 
 {
     @Override
     public void handle(HttpExchange exchange) throws IOException 
@@ -21,7 +23,7 @@ public class RecipeHandler extends RequestHandler implements HttpHandler
             case "DELETE":
                 break;
             default:
-                respondError(exchange, 400, "Invalid request method!");
+                HttpUtil.respondError(exchange, 400, "Invalid request method!");
         }
     }
 }
