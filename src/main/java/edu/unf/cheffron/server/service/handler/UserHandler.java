@@ -17,7 +17,7 @@ import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
-public class UserHandler extends Endpoint implements HttpHandler 
+public class UserHandler extends RequestHandler implements HttpHandler 
 {
     @Override
     public void handle(HttpExchange exchange) throws IOException 

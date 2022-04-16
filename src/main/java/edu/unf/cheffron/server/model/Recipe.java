@@ -7,7 +7,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-public record Recipe(String id, String name, Iterable<String> directions, Iterable<RecipeIngredient> ingredients) 
+public record Recipe(String recipeId, 
+                        String userId,
+                        String recipeName, 
+                        List<String> directions, 
+                        List<RecipeIngredient> ingredients, 
+                        int servings, 
+                        Boolean glutenFree, 
+                        Boolean spicy, 
+                        Boolean isPrivate) 
 {
     public Recipe
     {
@@ -16,13 +24,18 @@ public record Recipe(String id, String name, Iterable<String> directions, Iterab
 
     public static Recipe fromJson(JsonObject json)
     {
-        if (!json.has("id") || !json.has("name") || !json.has("directions") || !json.has("ingredients"))
+        if (!json.has("recipeId") || !json.has("userId") || !json.has("recipeName") || !json.has("directions") || !json.has("ingredients") || !json.has("userId") )
         {
             return null;
         }
 
-        String id = json.get("id").getAsString();
-        String name = json.get("name").getAsString();
+        String recipeId = json.get("recipeId").getAsString();
+        String userId = json.get("userId").getAsString();
+        String recipeName = json.get("recipeName").getAsString();
+        int servings = json.get("servings").getAsInt();
+        Boolean glutenFree = json.has("glutenFree") ? json.get("glutenFree").getAsBoolean() : false;
+        Boolean spicy = json.has("spicy") ? json.get("spicy").getAsBoolean() : false;
+        Boolean isPrivate = json.has("isPrivate") ? json.get("isPrivate").getAsBoolean() : false;
 
         JsonArray arr = json.getAsJsonArray("directions");
         
@@ -40,6 +53,6 @@ public record Recipe(String id, String name, Iterable<String> directions, Iterab
             ingredients.add(RecipeIngredient.fromJson(element.getAsJsonObject()));
         }
 
-        return new Recipe(id, name, directions, ingredients);
+        return new Recipe(recipeId, userId, recipeName, directions, ingredients, servings, glutenFree, spicy, isPrivate);
     }
 }

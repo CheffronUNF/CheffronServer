@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PantryRepository extends Repository<String, Pantry> {
-
+public class PantryRepository extends Repository<String, Pantry> 
+{
     public static final PantryRepository instance = new PantryRepository();
 
     private static final String createStatement = "INSERT INTO link_user_ingredient (userID, ingredientID, Amount, MeasurementType) VALUES (?, ?, ?, ?)";

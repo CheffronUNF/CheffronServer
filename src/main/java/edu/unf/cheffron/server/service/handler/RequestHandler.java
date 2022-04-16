@@ -9,7 +9,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 
-public abstract class Endpoint 
+public abstract class RequestHandler 
 {
     protected static final Gson gson = new Gson();
 
