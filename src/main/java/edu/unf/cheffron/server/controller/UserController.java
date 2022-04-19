@@ -1,6 +1,5 @@
 package edu.unf.cheffron.server.controller;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
@@ -13,22 +12,24 @@ import edu.unf.cheffron.server.util.HttpUtil;
 
 import java.sql.SQLException;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 
 public class UserController
 {
-    public void getUser(HttpExchange exchange)
+    public void getUser(HttpExchange exchange, String id)
     {
-        var json = HttpUtil.getJsonBody(exchange);
-        var userId = json.get("userId").getAsString();
-
         try 
         {
-            var user = UserRepository.instance.read(userId);
-            var res = HttpUtil.toJson(user);
+            var user = UserRepository.instance.read(id);
 
-            json = JsonParser.parseString(res).getAsJsonObject();
+            if (user == null)
+            {
+                HttpUtil.respondError(exchange, 404, "User not found.");
+                return;
+            }
+
+            var res = HttpUtil.toJson(user);
+            var json = JsonParser.parseString(res).getAsJsonObject();
             json.remove("name");
             json.remove("email");
             json.remove("password");
@@ -42,7 +43,7 @@ public class UserController
         }
     }
 
-    public void createUser(HttpExchange exchange) 
+    public void postUser(HttpExchange exchange) 
     {
         JsonObject json = HttpUtil.getJsonBody(exchange);
 
@@ -63,27 +64,22 @@ public class UserController
 
         try 
         {
-            if (UserRepository.instance.readByUsername(user.username()) != null) 
+            if (UserRepository.instance.readByUsername(user.username()) != null || UserRepository.instance.readByEmail(user.email()) != null) 
             {
-                HttpUtil.respondError(exchange, 400, "Username already exists");
+                HttpUtil.respondError(exchange, 406, "Username or Email already used.");
                 return;
             } 
-            
-            if (UserRepository.instance.readByEmail(user.email()) != null) 
-            {
-                HttpUtil.respondError(exchange, 400, "Email already exists");
-                return;
-            }
 
             String password = AuthUtil.hash(user.password().toCharArray());
 
-            UserRepository.instance.create(new User(user.userId(), user.username(), user.email(), user.name(), password, 0));
-            String jwt = AuthUtil.createJWT(user.userId(), user.username());
+            user = UserRepository.instance.create(new User(user.userId(), user.username(), user.email(), user.name(), password, 0));
 
-            JsonObject response = new JsonObject();
-            response.addProperty("jwt", jwt);
+            JsonObject response = HttpUtil.toJsonObject(user);
+            response.remove("name");
+            response.remove("email");
+            response.remove("password");
 
-            HttpUtil.respond(exchange, 200, response);
+            HttpUtil.respond(exchange, 201, response.toString());
         }
         catch (SQLException e) 
         {
@@ -92,11 +88,11 @@ public class UserController
         } 
     }
 
-    public void updateUser(HttpExchange exchange)
+    public void patchUser(HttpExchange exchange, String id)
     {
         var userId = AuthUtil.authenticateRequest(exchange);
 
-        if (userId == null)
+        if (userId == null || !userId.equals(id))
         {
             HttpUtil.respond(exchange, 401, "Must be logged in.");
             return;
@@ -106,25 +102,22 @@ public class UserController
         
         try 
         {
-            var userOrig = UserRepository.instance.read(userId);
-            var jsonOrig = JsonParser.parseString(HttpUtil.toJson(userOrig)).getAsJsonObject();
+            var user = UserRepository.instance.read(userId);
 
-            var jsonSet = json.entrySet();
-            for (Entry<String, JsonElement> entry : jsonSet) 
+            if (user == null)
             {
-                if (entry.getKey().equals("userId") || entry.getKey().equals("password"))
-                {
-                    continue;
-                }
-
-                jsonOrig.remove(entry.getKey());
-                jsonOrig.add(entry.getKey(), entry.getValue());
+                HttpUtil.respondError(exchange, 404, "User not found.");
+                return;
             }
 
-            var user = User.fromJson(jsonOrig);
-            UserRepository.instance.update(userId, user);
+            json.remove("userId");
+            json.addProperty("userId", user.userId());
 
-            HttpUtil.respond(exchange, 200, "User updated");
+            json.remove("password");
+            json.addProperty("password", user.password());
+
+            UserRepository.instance.update(userId, User.fromJson(json));
+            HttpUtil.respond(exchange, 201);
         } 
         catch (SQLException e) 
         {
@@ -133,18 +126,27 @@ public class UserController
         }
     }
 
-    public void deleteUser(HttpExchange exchange)
+    public void deleteUser(HttpExchange exchange, String id)
     {
         var userId = AuthUtil.authenticateRequest(exchange);
 
-        if (userId == null)
+        if (userId == null || !userId.equals(id))
         {
             HttpUtil.respond(exchange, 401, "Must be logged in.");
         }
 
         try 
         {
+            var user = UserRepository.instance.read(id);
+
+            if (user == null)
+            {
+                HttpUtil.respondError(exchange, 404, "User not found.");
+                return;
+            }
+            
             UserRepository.instance.delete(userId);
+            HttpUtil.respond(exchange, 200);
         } 
         catch (SQLException e) 
         {

@@ -15,19 +15,50 @@ public class UserRouter implements HttpHandler
     @Override
     public void handle(HttpExchange exchange) throws IOException 
     {
+        var uri = exchange.getRequestURI().getRawPath();
+        var split = uri.split("/");
+
+        switch (split.length)
+        {
+            case 2:
+                users(exchange);
+                break;
+            case 3:
+                user(exchange, split[2]);
+                break;
+            default:
+                HttpUtil.respondError(exchange, 400, "Invalid request method!");
+                break;
+        }
+    }
+
+    private void user(HttpExchange exchange, String id)
+    {
         switch (exchange.getRequestMethod()) 
         {
             case "GET":
-                controller.getUser(exchange);
-                break;
-            case "POST":
-                controller.createUser(exchange);
+                controller.getUser(exchange, id);
                 break;
             case "PATCH":
-                controller.updateUser(exchange);
+                controller.patchUser(exchange, id);
                 break;
             case "DELETE":
-                controller.deleteUser(exchange);
+                controller.deleteUser(exchange, id);
+                break;
+            default:
+                HttpUtil.respondError(exchange, 400, "Invalid request method!");
+        }
+    }
+
+    private void users(HttpExchange exchange)
+    {
+        switch (exchange.getRequestMethod()) 
+        {
+            case "GET":
+                HttpUtil.respondError(exchange, 400, "Invalid request method!");
+                break;
+            case "POST":
+                controller.postUser(exchange);
                 break;
             default:
                 HttpUtil.respondError(exchange, 400, "Invalid request method!");

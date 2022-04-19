@@ -21,6 +21,11 @@ public abstract class HttpUtil
         return gson.toJson(obj);
     }
 
+    public static JsonObject toJsonObject(Object obj)
+    {
+        return gson.toJsonTree(obj).getAsJsonObject();
+    }
+
     public static JsonObject getJsonBody(HttpExchange exchange) 
     {
         try 
@@ -48,6 +53,19 @@ public abstract class HttpUtil
         }
 
         return null; // errored out
+    }
+
+    public static void respond(HttpExchange exchange, int statusCode)
+    {
+        try 
+        {
+            exchange.sendResponseHeaders(statusCode, 0);
+            exchange.close();
+        } 
+        catch (IOException ex) 
+        {
+            CheffronLogger.log(Level.WARNING, "Could not respond to client!", ex);
+        }
     }
     
     public static void respond(HttpExchange exchange, int statusCode, String message) 

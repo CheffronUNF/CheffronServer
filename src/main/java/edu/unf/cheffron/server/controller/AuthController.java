@@ -9,6 +9,7 @@ import edu.unf.cheffron.server.util.AuthUtil;
 import edu.unf.cheffron.server.util.CheffronLogger;
 import edu.unf.cheffron.server.util.HttpUtil;
 
+import java.sql.SQLException;
 import java.util.Base64;
 import java.util.logging.Level;
 
@@ -80,5 +81,37 @@ public class AuthController
             CheffronLogger.log(Level.WARNING, e.getMessage());
             HttpUtil.respondError(exchange, 500, "Internal server error encountered when validating login");
         }
+    }
+
+    public void updatePassword(HttpExchange exchange)
+    {
+        var userId = AuthUtil.authenticateRequest(exchange);
+
+        if (userId == null)
+        {
+            HttpUtil.respond(exchange, 401, "Must be logged in.");
+            return;
+        }
+
+        var json = HttpUtil.getJsonBody(exchange);
+        var pass = json.get("password").getAsString();
+
+        pass = AuthUtil.hash(pass.toCharArray());
+
+        User user;
+        try 
+        {
+            user = UserRepository.instance.read(userId);
+
+            user = UserRepository.instance.update(userId, new User(user.userId(), user.username(), user.email(), user.name(), pass, user.chefHatsReceived()));
+        } 
+        catch (SQLException e) 
+        {
+            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
+            HttpUtil.respondError(exchange, 500, "Internal server error");
+            return;
+        }
+
+        HttpUtil.respond(exchange, 201);
     }
 }

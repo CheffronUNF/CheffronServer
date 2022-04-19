@@ -19,6 +19,9 @@ public class AuthRouter implements HttpHandler
             case "GET":
                 controller.login(exchange);
                 break;
+            case "PATCH":
+                controller.updatePassword(exchange);
+                break;
             default:
                 HttpUtil.respondError(exchange, 400, "Invalid request method!");
         }
