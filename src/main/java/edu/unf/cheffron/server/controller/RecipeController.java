@@ -14,18 +14,18 @@ public class RecipeController
 
     }
 
-    public void getRecipe(HttpExchange exchange)
+    public void getRecipe(HttpExchange exchange, String id)
     {
 
     }
 
-    public void patchRecipe(HttpExchange exchange)
+    public void patchRecipe(HttpExchange exchange, String id)
     {
 
     }
 
-    public void deleteRecipe(HttpExchange exchange)
+    public void deleteRecipe(HttpExchange exchange, String id)
     {
-        
+
     }
 }
