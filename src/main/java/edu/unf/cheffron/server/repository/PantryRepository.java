@@ -13,11 +13,16 @@ import java.util.UUID;
 
 public class PantryRepository extends Repository<String, Pantry> 
 {
-    public static final PantryRepository instance = new PantryRepository();
+    public static PantryRepository instance = new PantryRepository();
 
     private static final String createStatement = "INSERT INTO link_user_ingredient (userID, ingredientID, Amount, MeasurementType) VALUES (?, ?, ?, ?)";
     private static final String readStatement = "SELECT * FROM link_user_ingredient WHERE userID = ?";
     private static final String deleteStatement = "DELETE FROM link_user_ingredient WHERE userID = ?";
+
+    static
+    {
+        instance = new PantryRepository();
+    }
 
     @Override
     public Pantry create(Pantry item) throws SQLException 
@@ -35,7 +40,7 @@ public class PantryRepository extends Repository<String, Pantry>
             var stmt = MySQLDatabase.connect().prepareStatement(createStatement);
 
             stmt.setString(1, item.userId());
-            stmt.setString(2, ingredient.id());
+            stmt.setString(2, ingredient.ingredientId());
             stmt.setDouble(3, recipeIngredient.quantity());
             stmt.setString(4, recipeIngredient.unit());
 
@@ -98,11 +103,12 @@ public class PantryRepository extends Repository<String, Pantry>
         {
             userId = rs.getString("userID");
             String ingredientId = rs.getString("ingredientID");
-            String name = IngredientRepository.instance.read(ingredientId).name();
+            String recipeId = rs.getString("recipeId");
             double quantity = rs.getDouble("Amount");
             String unit = rs.getString("MeasurementType");
+            String name = IngredientRepository.instance.read(ingredientId).name();
 
-            ingredients.add(new RecipeIngredient(ingredientId, name, quantity, unit));
+            ingredients.add(new RecipeIngredient(ingredientId, recipeId, name, quantity, unit));
         }
 
         return new Pantry(userId, ingredients);

@@ -1,22 +1,40 @@
 package edu.unf.cheffron.server.repository;
 
 import edu.unf.cheffron.server.database.MySQLDatabase;
+import edu.unf.cheffron.server.util.CheffronLogger;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 public abstract class Repository<K, V>
 {
+    private static Connection connection;
+
+    static
+    {
+        try 
+        {
+            connection = MySQLDatabase.connect();
+        } 
+        catch (SQLException e) 
+        {
+            CheffronLogger.log(Level.SEVERE, "Could not connect to database!", e);
+            System.exit(1);
+        }
+    }
+
     abstract V create(V item) throws SQLException;
 
     abstract String getReadAllStatement();
 
-    public List<V> read() throws SQLException {
-        Connection connection = MySQLDatabase.connect();
-        var stmt = connection.prepareStatement(getReadAllStatement());
+    public List<V> read() throws SQLException 
+    {
+        var stmt = createStatement(getReadAllStatement());
 
         var rs = stmt.executeQuery();
         var size = getResultSetSize(rs);
@@ -38,7 +56,20 @@ public abstract class Repository<K, V>
 
     abstract V createFromRow(ResultSet rs) throws SQLException;
 
-    protected int getResultSetSize(ResultSet rs)
+    protected static PreparedStatement createStatement(String statement)
+    {
+        try
+        {
+            return connection.prepareStatement(statement, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    protected static int getResultSetSize(ResultSet rs)
     {
         int size = 0;
 
@@ -47,7 +78,7 @@ public abstract class Repository<K, V>
             int index = rs.getRow();
 
             rs.last();
-            rs.getRow();
+            size = rs.getRow();
 
             rs.absolute(index);
         }

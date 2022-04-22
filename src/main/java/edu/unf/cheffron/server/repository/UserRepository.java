@@ -1,17 +1,12 @@
 package edu.unf.cheffron.server.repository;
 
-import edu.unf.cheffron.server.database.MySQLDatabase;
 import edu.unf.cheffron.server.model.User;
-import edu.unf.cheffron.server.util.CheffronLogger;
 
 import java.sql.*;
-import java.util.logging.Level;
 
 public class UserRepository extends Repository<String, User>
 {
     public static UserRepository instance;
-
-    private final Connection connection;
 
     private final static String createStatement = "INSERT INTO user (UserId, Username, Email, Name, Password) VALUES (?, ?, ?, ?, ?)";
     private final static String readStatement = "SELECT * FROM user WHERE UserId = ?";
@@ -20,29 +15,16 @@ public class UserRepository extends Repository<String, User>
     private final static String readAllStatement = "SELECT * FROM user";
     private final static String updateStatement = "UPDATE user SET Username = ?, Email = ?, Name = ?, Password = ? WHERE UserId = ?";
     private final static String deleteStatement = "DELETE FROM user WHERE UserId = ?";
-
+    
     static
     {
-        try
-        {
-            instance = new UserRepository();
-        }
-        catch (SQLException ex)
-        {
-            CheffronLogger.log(Level.SEVERE, "Could not initialize User Repository!", ex);
-            System.exit(1);
-        }
-    }
-
-    private UserRepository() throws SQLException
-    {
-        connection = MySQLDatabase.connect();
+        instance = new UserRepository();
     }
 
     @Override
     public User create(User item) throws SQLException
     {
-        var stmt = connection.prepareStatement(createStatement);
+        var stmt = createStatement(createStatement);
 
         stmt.setString(1, item.userId());
         stmt.setString(2, item.username());
@@ -64,53 +46,38 @@ public class UserRepository extends Repository<String, User>
     @Override
     public User read(String id) throws SQLException
     {
-        var stmt = connection.prepareStatement(readStatement);
+        var stmt = createStatement(readStatement);
 
         stmt.setString(1, id);
 
         var rs = stmt.executeQuery();
-        if (!rs.next())
-        {
-            return null;
-        }
-        
-        return createFromRow(rs);
+        return rs.next() ? createFromRow(rs) : null;
     }
 
     public User readByEmail(String email) throws SQLException
     {
-        var stmt = connection.prepareStatement(readByEmailStatement);
+        var stmt = createStatement(readByEmailStatement);
 
         stmt.setString(1, email);
 
         var rs = stmt.executeQuery();
-        if (!rs.next())
-        {
-            return null;
-        }
-
-        return createFromRow(rs);
+        return rs.next() ? createFromRow(rs) : null;
     }
 
     public User readByUsername(String username) throws SQLException
     {
-        var stmt = connection.prepareStatement(readByUsernameStatement);
+        var stmt = createStatement(readByUsernameStatement);
 
         stmt.setString(1, username);
 
         var rs = stmt.executeQuery();
-        if (!rs.next())
-        {
-            return null;
-        }
-
-        return createFromRow(rs);
+        return rs.next() ? createFromRow(rs) : null;
     }
 
     @Override
     public User update(String id, User item) throws SQLException
     {
-        var stmt = connection.prepareStatement(updateStatement);
+        var stmt = createStatement(updateStatement);
 
         stmt.setString(1, item.username());
         stmt.setString(2, item.email());
@@ -126,7 +93,7 @@ public class UserRepository extends Repository<String, User>
     @Override
     public boolean delete(String id) throws SQLException
     {
-        var stmt = connection.prepareStatement(deleteStatement);
+        var stmt = createStatement(deleteStatement);
 
         stmt.setString(1, id);
 

@@ -4,9 +4,12 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import edu.unf.cheffron.server.controller.UserController;
+import edu.unf.cheffron.server.util.CheffronLogger;
 import edu.unf.cheffron.server.util.HttpUtil;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.logging.Level;
 
 public class UserRouter implements HttpHandler 
 {
@@ -16,15 +19,28 @@ public class UserRouter implements HttpHandler
     public void handle(HttpExchange exchange) throws IOException 
     {
         var uri = exchange.getRequestURI().getRawPath();
-        var split = uri.split("/");
+        var path = uri.split("/");
 
-        switch (split.length)
+        try
+        {
+            routeRequest(exchange, path);
+        }
+        catch (Exception e)
+        {
+            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
+        }
+    }
+
+    private void routeRequest(HttpExchange exchange, String[] path) throws SQLException
+    {
+
+        switch (path.length)
         {
             case 2:
                 users(exchange);
                 break;
             case 3:
-                user(exchange, split[2]);
+                user(exchange, path[2]);
                 break;
             default:
                 HttpUtil.respondError(exchange, 400, "Invalid request method!");
@@ -32,7 +48,7 @@ public class UserRouter implements HttpHandler
         }
     }
 
-    private void users(HttpExchange exchange)
+    private void users(HttpExchange exchange) throws SQLException
     {
         switch (exchange.getRequestMethod()) 
         {
@@ -47,7 +63,7 @@ public class UserRouter implements HttpHandler
         }
     }
 
-    private void user(HttpExchange exchange, String id)
+    private void user(HttpExchange exchange, String id) throws SQLException
     {
         switch (exchange.getRequestMethod()) 
         {
