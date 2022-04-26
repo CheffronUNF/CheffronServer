@@ -1,7 +1,6 @@
 package edu.unf.cheffron.server;
 
 import com.sun.net.httpserver.HttpServer;
-
 import edu.unf.cheffron.server.router.*;
 
 import java.io.IOException;
@@ -29,5 +28,6 @@ public class WebService
         server.createContext("/ingredient", new IngredientRouter());
         server.createContext("/recipe", new RecipeRouter());
         server.createContext("/user", new UserRouter());
+        server.createContext("/pantry", new PantryRouter());
     }
 }

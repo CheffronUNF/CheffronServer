@@ -19,11 +19,6 @@ public class PantryRepository extends Repository<String, Pantry>
     private static final String readStatement = "SELECT * FROM link_user_ingredient WHERE userID = ?";
     private static final String deleteStatement = "DELETE FROM link_user_ingredient WHERE userID = ?";
 
-    static
-    {
-        instance = new PantryRepository();
-    }
-
     @Override
     public Pantry create(Pantry item) throws SQLException 
     {
@@ -37,7 +32,7 @@ public class PantryRepository extends Repository<String, Pantry>
                 IngredientRepository.instance.create(ingredient);
             }
 
-            var stmt = MySQLDatabase.connect().prepareStatement(createStatement);
+            var stmt = createStatement(createStatement);
 
             stmt.setString(1, item.userId());
             stmt.setString(2, ingredient.ingredientId());
@@ -65,7 +60,7 @@ public class PantryRepository extends Repository<String, Pantry>
     @Override
     public Pantry read(String id) throws SQLException 
     {
-        var stmt = MySQLDatabase.connect().prepareStatement(readStatement);
+        var stmt = createStatement(readStatement);
         stmt.setString(1, id);
 
         var rs = stmt.executeQuery();
@@ -85,7 +80,7 @@ public class PantryRepository extends Repository<String, Pantry>
     @Override
     public boolean delete(String id) throws SQLException 
     {
-        var stmt = MySQLDatabase.connect().prepareStatement(deleteStatement);
+        var stmt = createStatement(deleteStatement);
         stmt.setString(1, id);
         return stmt.executeUpdate() > 0;
     }
@@ -103,7 +98,7 @@ public class PantryRepository extends Repository<String, Pantry>
         {
             userId = rs.getString("userID");
             String ingredientId = rs.getString("ingredientID");
-            String recipeId = rs.getString("recipeId");
+            String recipeId = "";
             double quantity = rs.getDouble("Amount");
             String unit = rs.getString("MeasurementType");
             String name = IngredientRepository.instance.read(ingredientId).name();
