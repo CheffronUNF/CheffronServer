@@ -11,10 +11,10 @@ public class RecipeRepository extends Repository<String, Recipe>
 {
     public static RecipeRepository instance;
 
-    private final String createStatement = "INSERT INTO recipe (recipeId, userId, directions, recipeName, servingSize, glutenFree, spicy, isPrivate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String createStatement = "INSERT INTO recipe (recipeId, userId, directions, recipeName, servingSize, time, glutenFree, spicy, isPrivate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private final String readStatement = "SELECT * FROM recipe WHERE recipeId = ?";
     private final String readAllStatement = "SELECT * FROM recipe";
-    private final String updateStatement = "UPDATE recipe SET directions = ?, recipeName = ?, servingSize = ?, glutenFree = ?, spicy = ?, isPrivate = ? WHERE recipeId = ?";
+    private final String updateStatement = "UPDATE recipe SET directions = ?, recipeName = ?, servingSize = ?, time = ?, glutenFree = ?, spicy = ?, isPrivate = ? WHERE recipeId = ?";
     private final String deleteStatement = "DELETE FROM recipe WHERE recipeId = ?";
     
     static
@@ -32,9 +32,10 @@ public class RecipeRepository extends Repository<String, Recipe>
         stmt.setString(3, item.directions());
         stmt.setString(4, item.recipeName());
         stmt.setInt(5, item.servings());
-        stmt.setBoolean(6, item.glutenFree());
-        stmt.setBoolean(7, item.spicy());
-        stmt.setBoolean(8, item.isPrivate());
+        stmt.setString(6, item.time());
+        stmt.setBoolean(7, item.glutenFree());
+        stmt.setBoolean(8, item.spicy());
+        stmt.setBoolean(9, item.isPrivate());
 
         stmt.executeUpdate();
 
@@ -66,13 +67,14 @@ public class RecipeRepository extends Repository<String, Recipe>
         stmt.setString(1, item.directions());
         stmt.setString(2, item.recipeName());
         stmt.setInt(3, item.servings());
-        stmt.setBoolean(4, item.glutenFree());
-        stmt.setBoolean(5, item.spicy());
-        stmt.setBoolean(6, item.isPrivate());
+        stmt.setString(4, item.time());
+        stmt.setBoolean(5, item.glutenFree());
+        stmt.setBoolean(6, item.spicy());
+        stmt.setBoolean(7, item.isPrivate());
 
         stmt.executeUpdate();
 
-        return new Recipe(id, item.userId(), item.recipeName(), item.directions(), item.ingredients(), item.servings(), item.glutenFree(), item.spicy(), item.isPrivate());
+        return new Recipe(id, item.userId(), item.recipeName(), item.directions(), item.ingredients(), item.servings(), item.time(), item.glutenFree(), item.spicy(), item.isPrivate());
     }
 
     @Override
@@ -93,12 +95,13 @@ public class RecipeRepository extends Repository<String, Recipe>
         String recipeName = rs.getString("recipeName");
         String directions = rs.getString("directions");
         int servings = rs.getInt("servingSize");
+        String time = rs.getString("time");
         Boolean glutenFree = rs.getBoolean("glutenFree");
         Boolean spicy = rs.getBoolean("spicy");
         Boolean isPrivate = rs.getBoolean("isPrivate");
         
         List<RecipeIngredient> ingredients = RecipeIngredientRepository.instance.readByRecipeId(recipeId);
 
-        return new Recipe(recipeId, userId, recipeName, directions, ingredients, servings, glutenFree, spicy, isPrivate);
+        return new Recipe(recipeId, userId, recipeName, directions, ingredients, servings, time, glutenFree, spicy, isPrivate);
     }
 }

@@ -1,6 +1,7 @@
 package edu.unf.cheffron.server.controller;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import com.google.gson.JsonObject;
@@ -20,15 +21,17 @@ public class RecipeController
     public void getRecipes(HttpExchange exchange) throws SQLException
     {
         var recipes = RecipeRepository.instance.read();
+        var updatedRecipes = new ArrayList<>();
 
         for (Recipe recipe : recipes)
         {
             var ingredients = RecipeIngredientRepository.instance.readByRecipeId(recipe.recipeId());
 
-            recipe = new Recipe(recipe.recipeId(), recipe.userId(), recipe.recipeName(), recipe.directions(), ingredients, recipe.servings(), recipe.glutenFree(), recipe.spicy(), recipe.isPrivate());
+            recipe = new Recipe(recipe.recipeId(), recipe.userId(), recipe.recipeName(), recipe.directions(), ingredients, recipe.servings(), recipe.time(), recipe.glutenFree(), recipe.spicy(), recipe.isPrivate());
+            updatedRecipes.add(recipe);
         }
 
-        HttpUtil.respond(exchange, 200, recipes);
+        HttpUtil.respond(exchange, 200, updatedRecipes);
     }
 
     public void postRecipes(HttpExchange exchange) throws SQLException
@@ -86,7 +89,7 @@ public class RecipeController
         }
 
         var ingredients = RecipeIngredientRepository.instance.readByRecipeId(recipe.recipeId());
-        recipe = new Recipe(recipe.recipeId(), recipe.userId(), recipe.recipeName(), recipe.directions(), ingredients, recipe.servings(), recipe.glutenFree(), recipe.spicy(), recipe.isPrivate());
+        recipe = new Recipe(recipe.recipeId(), recipe.userId(), recipe.recipeName(), recipe.directions(), ingredients, recipe.servings(), recipe.time(), recipe.glutenFree(), recipe.spicy(), recipe.isPrivate());
 
         HttpUtil.respond(exchange, 200, recipe);
     }
@@ -109,7 +112,7 @@ public class RecipeController
             return;
         }
 
-        if (recipe.userId() != userId)
+        if (!recipe.userId().equals(userId))
         {
             HttpUtil.respond(exchange, 401, "Can only update owned recipes.");
             return;
@@ -137,7 +140,7 @@ public class RecipeController
             return;
         }
 
-        if (recipe.userId() != userId)
+        if (!recipe.userId().equals(userId))
         {
             HttpUtil.respond(exchange, 401, "Can only delete owned recipes.");
             return;

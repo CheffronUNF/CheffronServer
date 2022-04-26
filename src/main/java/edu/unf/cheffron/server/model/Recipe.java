@@ -13,7 +13,8 @@ public record Recipe(String recipeId,
                         String recipeName, 
                         String directions, 
                         List<RecipeIngredient> ingredients, 
-                        int servings, 
+                        int servings,
+                        String time,
                         Boolean glutenFree, 
                         Boolean spicy, 
                         Boolean isPrivate) 
@@ -31,6 +32,7 @@ public record Recipe(String recipeId,
         String recipeName = json.get("recipeName").getAsString();
         String directions = json.get("directions").getAsString();
         int servings = json.get("servings").getAsInt();
+        String time = json.get("time").getAsString();
         Boolean glutenFree = json.has("glutenFree") ? json.get("glutenFree").getAsBoolean() : false;
         Boolean spicy = json.has("spicy") ? json.get("spicy").getAsBoolean() : false;
         Boolean isPrivate = json.has("isPrivate") ? json.get("isPrivate").getAsBoolean() : false;
@@ -48,6 +50,6 @@ public record Recipe(String recipeId,
             ingredients.add(RecipeIngredient.fromJson(obj));
         }
 
-        return new Recipe(recipeId, userId, recipeName, directions, ingredients, servings, glutenFree, spicy, isPrivate);
+        return new Recipe(recipeId, userId, recipeName, directions, ingredients, servings, time, glutenFree, spicy, isPrivate);
     }
 }
