@@ -6,84 +6,61 @@ import com.sun.net.httpserver.HttpExchange;
 import edu.unf.cheffron.server.model.User;
 import edu.unf.cheffron.server.repository.UserRepository;
 import edu.unf.cheffron.server.util.AuthUtil;
-import edu.unf.cheffron.server.util.CheffronLogger;
 import edu.unf.cheffron.server.util.HttpUtil;
 
 import java.sql.SQLException;
 import java.util.Base64;
-import java.util.logging.Level;
+
+import javax.naming.AuthenticationException;
 
 public class AuthController 
 {
     private static final String AuthHeader = "Authorization";
 
-    public void login(HttpExchange exchange)
+    public void login(HttpExchange exchange) throws AuthenticationException, SQLException
     {
         var headers = exchange.getRequestHeaders();
 
         if (!headers.containsKey(AuthHeader))
         {
-            HttpUtil.respondError(exchange, 401, "No Authorization header");
-            return;
+            throw new AuthenticationException("No Authorization header.");
         }
 
         var auth = headers.get(AuthHeader);
 
         if (auth.isEmpty())
         {
-            HttpUtil.respondError(exchange, 401, "No username or password");
-            return;
+            throw new AuthenticationException("Malformed Authorization header.");
         }
 
-        String[] userpass;
+        // remove the "Basic " from the string
+        String basic = auth.get(0);
+        String credentials = basic.substring(6, basic.length());
+        String encoded = new String(Base64.getDecoder().decode(credentials));
 
-        try
-        {
-            // remove the "Basic " from the string
-            String basic = auth.get(0);
-            String credentials = basic.substring(6, basic.length());
-            String encoded = new String(Base64.getDecoder().decode(credentials));
-
-            userpass = encoded.split(":");
-        }
-        catch (Exception ex)
-        {
-            HttpUtil.respondError(exchange, 401, "Malformed Authorization header");
-            return;
-        }
+        String[] userpass = encoded.split(":");
 
         if (userpass.length != 2)
         {
-            HttpUtil.respondError(exchange, 401, "Missing username or password");
-            return;
+            throw new AuthenticationException("Missing username or password.");
         }
 
-        try
+        User user = UserRepository.instance.readByUsername(userpass[0]);
+
+        if (!AuthUtil.authenticate(userpass[1].toCharArray(), user.password()))
         {
-            User user = UserRepository.instance.readByUsername(userpass[0]);
-
-            if (!AuthUtil.authenticate(userpass[1].toCharArray(), user.password()))
-            {
-                HttpUtil.respondError(exchange, 401, "Incorrent username or password");
-            }
-            else
-            {
-                String jwt = AuthUtil.createJWT(user.userId(), userpass[0]);
-
-                JsonObject response = new JsonObject();
-                response.addProperty("jwt", jwt);
-
-                HttpUtil.respond(exchange, 200, response);
-            }
+            throw new AuthenticationException("Incorrect username or password.");
         }
-        catch (Exception e)
-        {
-            CheffronLogger.log(Level.WARNING, e.getMessage());
-            HttpUtil.respondError(exchange, 500, "Internal server error encountered when validating login");
-        }
+        
+        String jwt = AuthUtil.createJWT(user.userId(), userpass[0]);
+
+        JsonObject response = new JsonObject();
+        response.addProperty("jwt", jwt);
+
+        HttpUtil.respond(exchange, 200, response);
     }
 
-    public void updatePassword(HttpExchange exchange)
+    public void updatePassword(HttpExchange exchange) throws SQLException
     {
         var userId = AuthUtil.authenticateRequest(exchange);
 
@@ -98,19 +75,9 @@ public class AuthController
 
         pass = AuthUtil.hash(pass.toCharArray());
 
-        User user;
-        try 
-        {
-            user = UserRepository.instance.read(userId);
+        User user = UserRepository.instance.read(userId);
 
-            user = UserRepository.instance.update(userId, new User(user.userId(), user.username(), user.email(), user.name(), pass, user.chefHatsReceived()));
-        } 
-        catch (SQLException e) 
-        {
-            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
-            HttpUtil.respondError(exchange, 500, "Internal server error");
-            return;
-        }
+        user = UserRepository.instance.update(userId, new User(user.userId(), user.username(), user.email(), user.name(), pass, user.chefHatsReceived()));
 
         HttpUtil.respond(exchange, 201);
     }

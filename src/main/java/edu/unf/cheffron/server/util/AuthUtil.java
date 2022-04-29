@@ -75,14 +75,14 @@ public final class AuthUtil
 
     public static String authenticateRequest(HttpExchange exchange)
     {
-        var jws = exchange.getRequestHeaders().get("jws");
+        var jwt = exchange.getRequestHeaders().get("jwt");
         
-        if (jws.size() == 0)
+        if (jwt.size() == 0)
         {
             return null;
         }
 
-        return authenticateJWT(jws.get(0));
+        return authenticateJWT(jwt.get(0));
     }
 
     public static String authenticateJWT(String jws) 

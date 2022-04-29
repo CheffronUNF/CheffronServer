@@ -1,6 +1,5 @@
 package edu.unf.cheffron.server.repository;
 
-import edu.unf.cheffron.server.database.MySQLDatabase;
 import edu.unf.cheffron.server.model.Ingredient;
 import edu.unf.cheffron.server.model.Pantry;
 import edu.unf.cheffron.server.model.RecipeIngredient;
