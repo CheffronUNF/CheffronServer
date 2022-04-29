@@ -11,7 +11,7 @@ public class RecipeRepository extends Repository<String, Recipe>
 {
     public static RecipeRepository instance;
 
-    private final String createStatement = "INSERT INTO recipe (recipeId, userId, directions, recipeName, servingSize, time, glutenFree, spicy, isPrivate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String createStatement = "INSERT INTO recipe (recipeId, userId, directions, recipeName, servingSize, time, glutenFree, spicy, isPrivate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private final String readStatement = "SELECT * FROM recipe WHERE recipeId = ?";
     private final String readAllStatement = "SELECT * FROM recipe";
     private final String updateStatement = "UPDATE recipe SET directions = ?, recipeName = ?, servingSize = ?, time = ?, glutenFree = ?, spicy = ?, isPrivate = ? WHERE recipeId = ?";
