@@ -54,10 +54,8 @@ public class AuthController
         
         String jwt = AuthUtil.createJWT(user.userId(), userpass[0]);
 
-        JsonObject response = new JsonObject();
-        response.addProperty("jwt", jwt);
-
-        HttpUtil.respond(exchange, 200, response);
+        exchange.getResponseHeaders().add("jwt", jwt);
+        HttpUtil.respond(exchange, 200);
     }
 
     public void updatePassword(HttpExchange exchange) throws SQLException
