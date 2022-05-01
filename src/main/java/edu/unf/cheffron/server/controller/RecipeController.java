@@ -146,6 +146,13 @@ public class RecipeController
             return;
         }
 
+        var ingredients = RecipeIngredientRepository.instance.readByRecipeId(recipe.recipeId());
+
+        for (var ingredient : ingredients)
+        {
+            RecipeIngredientRepository.instance.delete(ingredient.ingredientId());
+        }
+
         RecipeRepository.instance.delete(id);
         HttpUtil.respond(exchange, 200, recipe);
     }
