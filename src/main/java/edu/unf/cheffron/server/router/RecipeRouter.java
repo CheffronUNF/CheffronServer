@@ -8,6 +8,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import edu.unf.cheffron.server.controller.RecipeController;
+import edu.unf.cheffron.server.exception.HttpException;
 import edu.unf.cheffron.server.util.CheffronLogger;
 import edu.unf.cheffron.server.util.HttpUtil;
 
@@ -25,9 +26,14 @@ public class RecipeRouter implements HttpHandler
         {
             routeRequest(exchange, path);
         }
+        catch (HttpException e)
+        {
+            HttpUtil.respondError(exchange, e.statusCode, e.message);
+        }
         catch (SQLException e)
         {
-            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
+            CheffronLogger.log(Level.SEVERE, e.getMessage(), e);
+            HttpUtil.respondError(exchange, 500, "Internal Server Error");
         }
     }
 
@@ -71,10 +77,13 @@ public class RecipeRouter implements HttpHandler
         {
             case "GET":
                 controller.getRecipe(exchange, id);
+                break;
             case "PATCH":
                 controller.patchRecipe(exchange, id);
+                break;
             case "DELETE":
                 controller.deleteRecipe(exchange, id);
+                break;
             default:
                 HttpUtil.respondError(exchange, 400, "Invalid request method!");
         }

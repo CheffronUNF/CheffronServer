@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import edu.unf.cheffron.server.controller.UserController;
+import edu.unf.cheffron.server.exception.HttpException;
 import edu.unf.cheffron.server.util.CheffronLogger;
 import edu.unf.cheffron.server.util.HttpUtil;
 
@@ -25,9 +26,14 @@ public class UserRouter implements HttpHandler
         {
             routeRequest(exchange, path);
         }
+        catch (HttpException e)
+        {
+            HttpUtil.respondError(exchange, e.statusCode, e.message);
+        }
         catch (Exception e)
         {
-            CheffronLogger.log(Level.SEVERE, "Error communicating with database!", e);
+            CheffronLogger.log(Level.SEVERE, e.getMessage(), e);
+            HttpUtil.respondError(exchange, 500, "Internal Server Error.");
         }
     }
 

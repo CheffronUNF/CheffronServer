@@ -28,9 +28,9 @@ public class PantryRouter implements HttpHandler
         {
             HttpUtil.respondError(exchange, 401, ex.getMessage());
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            CheffronLogger.log(Level.SEVERE, ex.getMessage());
+            CheffronLogger.log(Level.SEVERE, e.getMessage(), e);
             HttpUtil.respondError(exchange, 500, "Internal Server Error.");
         }
     }

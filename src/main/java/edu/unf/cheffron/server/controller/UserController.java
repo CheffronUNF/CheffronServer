@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 
+import edu.unf.cheffron.server.exception.HttpException;
 import edu.unf.cheffron.server.model.User;
 import edu.unf.cheffron.server.repository.UserRepository;
 import edu.unf.cheffron.server.util.AuthUtil;
@@ -20,8 +21,7 @@ public class UserController
 
         if (user == null)
         {
-            HttpUtil.respondError(exchange, 404, "User not found.");
-            return;
+            throw new HttpException(404, "User not found");
         }
 
         var res = HttpUtil.toJson(user);
@@ -39,8 +39,7 @@ public class UserController
 
         if (json == null)
         {
-            HttpUtil.respondError(exchange, 400, "Invalid json data received.");
-            return;
+            throw new HttpException(400, "Invalid json");
         }
 
         json.addProperty("userId", UUID.randomUUID().toString());
@@ -48,26 +47,19 @@ public class UserController
 
         if (user == null)
         {
-            HttpUtil.respondError(exchange, 400, "Invalid data received.");
-            return;
+            throw new HttpException(400, "Invalid data");
         }
 
         if (UserRepository.instance.readByUsername(user.username()) != null || UserRepository.instance.readByEmail(user.email()) != null) 
         {
-            HttpUtil.respondError(exchange, 406, "Username or Email already used.");
-            return;
+            throw new HttpException(406, "Username or Email already used");
         } 
 
         String password = AuthUtil.hash(user.password().toCharArray());
 
         user = UserRepository.instance.create(new User(user.userId(), user.username(), user.email(), user.name(), password, 0));
 
-        JsonObject response = HttpUtil.toJsonObject(user);
-        response.remove("name");
-        response.remove("email");
-        response.remove("password");
-
-        HttpUtil.respond(exchange, 201, response.toString());
+        HttpUtil.respond(exchange, 201);
     }
 
     public void patchUser(HttpExchange exchange, String id) throws SQLException
@@ -76,15 +68,13 @@ public class UserController
 
         if (userId == null || !userId.equals(id))
         {
-            HttpUtil.respond(exchange, 401, "Must be logged in.");
-            return;
+            throw new HttpException(401, "Must be logged in");
         }
 
         var user = UserRepository.instance.read(userId);
         if (user == null)
         {
-            HttpUtil.respondError(exchange, 404, "User not found.");
-            return;
+            throw new HttpException(404, "User not found");
         }
 
         var json = HttpUtil.getJsonBody(exchange);
@@ -104,14 +94,13 @@ public class UserController
 
         if (userId == null || !userId.equals(id))
         {
-            HttpUtil.respond(exchange, 401, "Must be logged in.");
+            throw new HttpException(401, "Must be logged in");
         }
 
         var user = UserRepository.instance.read(id);
         if (user == null)
         {
-            HttpUtil.respondError(exchange, 404, "User not found.");
-            return;
+            throw new HttpException(404, "User not found");
         }
         
         UserRepository.instance.delete(userId);

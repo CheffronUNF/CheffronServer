@@ -1,6 +1,5 @@
 package edu.unf.cheffron.server.controller;
 
-import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 
 import edu.unf.cheffron.server.model.User;
@@ -75,7 +74,7 @@ public class AuthController
 
         User user = UserRepository.instance.read(userId);
 
-        user = UserRepository.instance.update(userId, new User(user.userId(), user.username(), user.email(), user.name(), pass, user.chefHatsReceived()));
+        UserRepository.instance.update(userId, new User(user.userId(), user.username(), user.email(), user.name(), pass, user.chefHatsReceived()));
 
         HttpUtil.respond(exchange, 201);
     }

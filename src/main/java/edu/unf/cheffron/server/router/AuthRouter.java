@@ -24,13 +24,13 @@ public class AuthRouter implements HttpHandler
         {
             routeRequest(exchange);
         }
-        catch (AuthenticationException ex)
+        catch (AuthenticationException e)
         {
-            HttpUtil.respondError(exchange, 401, ex.getMessage());
+            HttpUtil.respondError(exchange, 401, e.getMessage());
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            CheffronLogger.log(Level.SEVERE, ex.getMessage());
+            CheffronLogger.log(Level.SEVERE, e.getMessage(), e);
             HttpUtil.respondError(exchange, 500, "Internal Server Error.");
         }
     }

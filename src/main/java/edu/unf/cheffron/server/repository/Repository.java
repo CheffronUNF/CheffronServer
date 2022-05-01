@@ -60,11 +60,13 @@ public abstract class Repository<K, V>
     {
         try
         {
+            connection = MySQLDatabase.connect();
+
             return connection.prepareStatement(statement, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            CheffronLogger.log(Level.SEVERE, "Server connection lost!", e);
             return null;
         }
     }
